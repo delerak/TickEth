@@ -1,0 +1,376 @@
+<script>
+console.log("start")
+let events;
+
+function buy(item){
+  console.log(item)
+  var id, type, quantity,price;
+  tickets=$("#modal"+item+" input");
+  console.log(tickets)
+  for(var i=0;i<tickets.length;i++){
+    if(tickets[i].name=="id"){
+      id=tickets[i].value
+    }
+    if(tickets[i].name=="quantity"){
+      console.log("aaaa:" +tickets[i].value);
+      if(tickets[i].value>0){
+        type=tickets[i-1].value;
+        quantity=tickets[i].value;
+        price=tickets[++i].value;
+      }
+    }
+  }
+  console.log(type);
+  console.log(quantity);
+  console.log("id "+"0x"+id);
+  ContractTickets.buy("0x"+id, type, quantity, {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', value: web3.toWei(quantity*price, 'ether')},function(error, result){
+     if(!error)
+         console.log(result)
+     else
+         console.error(error);
+ });
+
+};
+window.addEventListener('load', function () {
+  console.log("ok");
+if (typeof web3 !== 'undefined') {
+  console.log("siiii");
+  web3Provider = web3.currentProvider;
+} else {
+  console.log("ganache");
+  // If no injected web3 instance is detected, fall back to Ganache
+  web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
+}
+web3 = new Web3(web3Provider);
+web3.eth.getAccounts(function(error, accounts) {
+  web3.eth.defaultAccount = accounts[0];
+  });
+
+
+var abiTickets= '[\
+    {\
+      "constant": true,\
+      "inputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "events",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "view",\
+      "type": "function"\
+    },\
+    {\
+      "inputs": [\
+        {\
+          "name": "_userContract",\
+          "type": "address"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "constructor"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "i",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "getEventsSize",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "i",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "getEventName",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "string"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "i",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "getEventTicketPerPerson",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "i",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "getEventTicketBought",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "_id",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "_nome",\
+          "type": "string"\
+        },\
+        {\
+          "name": "_startTimeStamp",\
+          "type": "uint256"\
+        },\
+        {\
+          "name": "_endTimeStamp",\
+          "type": "uint256"\
+        },\
+        {\
+          "name": "_ticketsType",\
+          "type": "bytes32[]"\
+        },\
+        {\
+          "name": "_maxTicketPerson",\
+          "type": "uint256"\
+        },\
+        {\
+          "name": "_ticketPrices",\
+          "type": "uint256[]"\
+        },\
+        {\
+          "name": "_ticketLeft",\
+          "type": "uint256[]"\
+        }\
+      ],\
+      "name": "addEvent",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "idEvent",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "typeTicket",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "quantity",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "buy",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": true,\
+      "stateMutability": "payable",\
+      "type": "function"\
+    }\
+  ]';
+var abiUsers = '[\
+    {\
+      "constant": true,\
+      "inputs": [\
+        {\
+          "name": "",\
+          "type": "address"\
+        }\
+      ],\
+      "name": "UserHash",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "view",\
+      "type": "function"\
+    },\
+    {\
+      "constant": true,\
+      "inputs": [],\
+      "name": "owner",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "address"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "view",\
+      "type": "function"\
+    },\
+    {\
+      "inputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "constructor"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "_account",\
+          "type": "address"\
+        }\
+      ],\
+      "name": "getUserHash",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "who",\
+          "type": "address"\
+        },\
+        {\
+          "name": "hash",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "name": "setNewUser",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    }\
+  ]';
+
+ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0x3a2d0473907595d640d5730a270733caac1b4325');
+ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0xd72145b684a4add805885fb9a17814bff79787ff');
+
+console.log(ContractTickets);
+
+
+});
+function hideModal()
+{
+    // Using a very general selector - this is because $('#modalDiv').hide
+    // will remove the modal window but not the mask
+    $('.modal.in').modal('hide');
+}
+function doModal(placementId, heading, formContent, strSubmitFunc, btnText,idModal)
+{
+
+    html =  '<div class="modal fade" tabindex="-1" id="modal'+idModal+'" role="dialog" aria-labelledby="confirm-modal" aria-hidden="true">';
+    html += '<div class="modal-dialog">';
+    html += '<div class="modal-content">';
+    html += '<div class="modal-header">';
+    html += '<a class="close" data-dismiss="modal">×</a>';
+    html += '<h4>'+'</h4>'
+    html += '</div>';
+    html += '<div class="modal-body">';
+    html += formContent;
+    html+='<form id="tickets" method="post" action="/"><input type="hidden" name="id" value="'+idModal+'">';
+    events=JSON.parse("{{toJSON events}}".replace(/&quot;/g, '\"'))
+    for (i=0;i<events.length;i++){
+      if(events[i]._id==idModal){
+        for (const [key, value] of Object.entries(events[i].ticketsdict)) {
+          html+="<br>Zone: "+key+"<br>Price: "+value+"<br><input type='hidden' name='type' value='"+key+"'></input> <input name='quantity' placeholder='2'></input><input name='price' type='hidden' value='"+value+"'></input>";
+        }
+      }
+    }
+    /**/
+    html += '<br><br><button class="btn btn-default btn-adopt btn-success" data-id="'+idModal+'" data-dismiss="modal" onClick="hideModal();buy(\''+idModal+'\')">Buy</button></form>'
+    html += '</div>';
+    html += '<div class="modal-footer">';
+    if (btnText!='') {
+
+
+    }
+    html += '<span class="btn" data-dismiss="modal">';
+
+    html += '</span>'; // close button
+    html += '</div>';  // footer
+    html += '</div>';  // content
+    html += '</div>';  // dialog
+    html += '</div>';  // modalWindow
+    $("#"+placementId).html(html);
+    $("#modal"+idModal).modal();
+    $("#dynamicModal").modal('show');
+}
+
+</script>
+
+<div class="row">
+{{#each events}}
+<div id="myModal"></div>
+<div class="card col-sm-3" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">{{name}}</h5>
+    <h6 class="card-subtitle mb-2 text-muted">{{date}}</h6>
+    <p class="card-text">{{desc}}
+    </p>
+    <a href="#" class="card-link" onClick="doModal('myModal','', '{{name}}', 'doModal()','{{name}}','{{_id}}' )">Buy Ticket</a>
+    <a href="#" class="card-link">details</a>
+  </div>
+</div>
+{{/each}}
+</div>

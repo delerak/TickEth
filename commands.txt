@@ -1,0 +1,21 @@
+truffle console
+compile
+migrate
+truffle(development)> Users.new().then(function(res) { sc = Users.at(res.address) })
+undefined
+truffle(development)> sc.address
+'0xb2f31c3ebf3e8e9db3b4376271a8c8949b59a3b4'
+truffle(development)> Tickets.new(sc.address).then(function(res) { sct = Tickets.at(res.address) })
+undefined
+truffle(development)> sct.address
+'0xedee9897af1ce858096d739ff3eb7b3d44ab34ae'
+truffle(development)> sc.getUserHash.call('0xd49186534cac094b040306f316aa11e20cd51e58').then(function(res){console.log(res);})
+0x0000000000000000000000000000000000000000000000000000000000000000
+truffle(development)> sc.setNewUser('123','1234').then(function(res){console.log(res);})
+truffle(development)> sct.getEventsNames.call(0).then(function(res){console.log(web3.toAscii(res));})
+Concerto Arctic Monkeys
+
+
+
+
+IL CONTRATTO HA DAVVERO BISOGNO DI TUTTA STA ROBA???...si...
