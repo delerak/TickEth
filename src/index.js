@@ -13,6 +13,7 @@ var url = "mongodb://localhost:27017/ticksell";
 var dbo;
 var ContractUsers;
 const address='0xd49186534cac094b040306f316aa11e20cd51e58';
+
 MongoClient.connect(url, function(err, db) {
   if (err) throw err;
   dbo = db.db("ticksell");
@@ -28,6 +29,7 @@ MongoClient.connect(url, function(err, db) {
       web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
     }
     web3 = new Web3(web3Provider);
+    console.log(web3.version.api)
     web3.eth.getAccounts(function(error, accounts) {
       web3.eth.defaultAccount = accounts[0];
       console.log(web3.eth.defaultAccount);
@@ -243,7 +245,8 @@ MongoClient.connect(url, function(err, db) {
   })
 });
 
-app.use(bodyParser.urlencoded({extended: true}))
+//app.use(bodyParser.urlencoded({extended: true}))
+app.use(express.static('src'));
 
 app.engine('.hbs', exphbs({
   defaultLayout: 'home',
@@ -260,7 +263,7 @@ app.set('views', path.join(__dirname, 'views'))
 app.post('/', (req, res) => {
   console.log("ok")
   //console.log(req.body);
-  ContractTickets.methods.buy(req.body.id[0], req.body.type[0], req.type.quantity[0]).send({from:web3.eth.defaultAccount, to:'0x2ffe4f0e841655d2711449dfc5a756faaaf84482', value:"100000"});
+  //ContractTickets.methods.buy(req.body.id[0], req.body.type[0], req.type.quantity[0]).send({from:web3.eth.defaultAccount, to:'0x2ffe4f0e841655d2711449dfc5a756faaaf84482', value:"100000"});
   //res.render('main');
 })
 app.get('/', (req, res) => {
@@ -285,6 +288,11 @@ app.get('/', (req, res) => {
       })
 
   })
+
+})
+app.get('/user', (req, res) => {
+
+  res.render('user')
 
 })
 app.post('/addEvents',(req, res) => {
