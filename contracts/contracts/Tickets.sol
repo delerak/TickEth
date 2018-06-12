@@ -2,9 +2,14 @@ pragma solidity ^0.4.19;
 import "./Users.sol";
 contract Tickets {
     address usersContract;
+    address public owner;
     struct buyer{
       mapping (bytes32 => uint) ticketQuantity;//type->quantity
       uint nticket;
+    }
+    struct seller{
+      uint percreturn;
+      uint ntickets;
     }
     struct eventObject{
       bytes32 id;
@@ -15,6 +20,8 @@ contract Tickets {
       uint maxTicketPerson;
       uint[] ticketPrices;
       uint[] ticketLeft;
+      mapping (address => seller) resellers;
+      address[] resellersAddr;
       mapping (address => buyer) sold;
       mapping (bytes32 => uint) ticketPricesMap;
     }
@@ -31,8 +38,12 @@ contract Tickets {
     function getEventTicketPerPerson(uint i) public returns (uint){
       return eventStore[events[i]].maxTicketPerson;
     }
-    function getEventTicketBought(uint i) public returns (uint){
-      return eventStore[events[i]].sold[msg.sender].nticket;
+    function getEventTicketBought(uint i, address addr) public returns (uint){
+      return eventStore[events[i]].sold[addr].nticket;
+    }
+    function addReseller(address addr, uint perc, uint ntickets, uint i ) public{
+      eventStore[events[i]].reseller[addr].percreturn=perc;
+      eventStore[events[i]].reseller[addr].ntickets=ntickets;
     }
     function addEvent(bytes32 _id, bytes32 _nome, bytes32[] _ticketsType, uint _maxTicketPerson, uint[] _ticketPrices, uint[] _ticketLeft) public
     //function addEvent(bytes32 _id, bytes32 _nome,  uint _maxTicketPerson) public
@@ -48,36 +59,24 @@ contract Tickets {
       eventStore[_id].ticketPrices=_ticketPrices;
       eventStore[_id].ticketLeft=_ticketLeft;
 
-        /*eventObject myStruct = new eventObject({
-          id:_id,
-          nome:_nome,
-          startTimeStamp:_startTimeStamp,
-          endTimeStamp:_endTimeStamp,
-          ticketsType:_ticketsType,
-          maxTicketPerson:_maxTicketPerson,
-          ticketPrices:_ticketPrices,
-          ticketLeft:_ticketLeft
-          });*/
-        //eventsmap[events.length-1]=myStruct;
-
-
-
-
     }
     function Tickets(address _userContract) public{
       usersContract=_userContract;
+      owner = msg.sender;
     }
-
 
    function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity) payable public returns (uint) {
     uint money = msg.value;
-    //require (users.getUserHash(msg.sender)!=0);
+    require (users.getUserHash(msg.sender)!=0);
     //require (block.timestamp > evento.startTimeStamp);
     //require (block.timestamp < evento.endTimeStamp);
-    //require(evento.ticketPricesMap[typeTicket]*quantity == money);
+    require(evento.ticketPricesMap[typeTicket]*quantity == money);
 
     //require(quantity <= evento.maxTicketPerson);
     //require(evento.sold[msg.sender].nticket+quantity<=evento.maxTicketPerson);
+    if(eventStore[idEvent].resellersAddr.length>0){
+      require(eventStore[idEvent].reseller[msg.sender].ntickets!=0));
+    }
     if(eventStore[idEvent].sold[msg.sender].nticket>0){
       eventStore[idEvent].sold[msg.sender].ticketQuantity[typeTicket]+=quantity;
       eventStore[idEvent].sold[msg.sender].nticket+=quantity;

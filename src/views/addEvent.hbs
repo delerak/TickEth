@@ -1,4 +1,10 @@
 
+{{#if saved}}
+<div class="row" style="background-color:green;color:white;justify-content: center;">Event saved</div>
+{{/if}}
+
+<br><br>
+<div class="row">
 <div class="col-sm-3"></div>
 <form class="col-sm-6" action="/addEvents" method="POST">
 
@@ -39,3 +45,4 @@
 
 <input type="submit" class="form-control-file" value="Invia">
 </form>
+</div>

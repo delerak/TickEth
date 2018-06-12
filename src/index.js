@@ -29,13 +29,13 @@ MongoClient.connect(url, function(err, db) {
       web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
     }
     web3 = new Web3(web3Provider);
-    console.log(web3.version.api)
+    //console.log(web3.version.api)
     web3.eth.getAccounts(function(error, accounts) {
       web3.eth.defaultAccount = accounts[0];
       console.log(web3.eth.defaultAccount);
-      ContractUsers.methods.getUserHash(address).call().then(function(result){
-        console.log(web3.utils.hexToUtf8(result));
-      });
+      //ContractUsers.methods.getUserHash(address).call().then(function(result){
+    //    console.log(web3.utils.hexToUtf8(result));
+    //  });
 
     });
 
@@ -84,6 +84,44 @@ MongoClient.connect(url, function(err, db) {
         {\
           "name": "",\
           "type": "bytes32"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "i",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "getEventTicketPerPerson",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "i",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "getEventTicketBought",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
         }\
       ],\
       "payable": false,\
@@ -231,8 +269,8 @@ MongoClient.connect(url, function(err, db) {
     }\
   ]';
 
-  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0x3a2d0473907595d640d5730a270733caac1b4325');
-  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xd72145b684a4add805885fb9a17814bff79787ff');
+  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0xbf8722cda164fbc6d9ccf8b3ff4944f7de29be8a');
+  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xd52fec107ebb3e238aab7c3b9b81be86673e9cdc');
 
   //console.log(ContractUsers);
   /*ContractUsers.methods.setNewUser(address, web3.utils.asciiToHex('121212'), {gas: 999999}).call().then(function(err,result){
@@ -245,7 +283,7 @@ MongoClient.connect(url, function(err, db) {
   })
 });
 
-//app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.urlencoded({extended: true}))
 app.use(express.static('src'));
 
 app.engine('.hbs', exphbs({
@@ -291,6 +329,25 @@ app.get('/', (req, res) => {
 
 })
 app.get('/user', (req, res) => {
+  res.render('user')
+})
+app.post('/user', (req, res) => {
+  var ad = req.body.addr;
+  var nam= req.body.name;
+  var nounce = req.body.nounce;
+  var idEven=req.body.idEvent;
+  var hashstr = web3.utils.sha3(nam+""+ad+""+nounce, {encoding: 'hex'})
+  ContractTickets.methods.getEventTicketBought(idEven).call().then(function(result){
+    console.log("Biglietti: "+result);
+  });
+  ContractUsers.methods.getUserHash(ad).call().then(function(result){
+    if(result==hashstr){
+      console.log("Utente verificato")
+    }else{
+      console.log("Utente non verificato")
+    }
+
+  });
 
   res.render('user')
 
@@ -317,30 +374,32 @@ app.post('/addEvents',(req, res) => {
     ContractTickets.methods.addEvent( id, web3.utils.asciiToHex(myobj.name), ticktype, myobj.maxticket, tickprices, [100,100] ).send({from: web3.eth.defaultAccount , gas: 6000000 }).then(function(error, accounts) {console.log(error)});
     //ContractTickets.methods.addEvent( web3.utils.asciiToHex(myobj.name), web3.utils.asciiToHex(myobj.name),  myobj.maxticket).send({from: web3.eth.defaultAccount, gas: 6000000 }).then(function(error, accounts) {console.log(error)});
 
-    res.render('addEvent')
+    res.render('addEvent',{saved:true})
   });
 
 }
 )
 app.get('/addEvents', (req, res) => {
-  res.render('addEvent')
+  res.render('addEvent', {saved:false})
 })
 app.get('/addUser', (req, res) => {
-  res.render('addUser')
+  res.render('addUser',{saved:false})
 })
 app.post('/addUser', (req, res) => {
-  console.log(req.body);
+  console.log(req);
   var myobj = { name: req.body.name, address: req.body.address, documento: "ASPOEODJIA£" , nounce:makeNounce(), approved:0};
   console.log(myobj);
   dbo.collection("users").insertOne(myobj, function(err, res) {
-    if (err) throw err;
-    console.log("1 document inserted");
+    if (err) {
+      res.render('addUser', {saved:"false"})
+      return;
+    }
   });
-  res.render('addUser')
+  res.render('addUser', {saved:"true"})
 })
 app.get('/validateUsers', (req, res) => {
       var query = { approved: 0 };
-
+      var saved=false;
       dbo.collection("users").find(query).toArray(function(err, data) {
         if (err) throw err;
 
@@ -360,13 +419,13 @@ app.get('/validateUsers', (req, res) => {
             console.log("hash:"+hashstr);
             console.log("address: "+ item.address);
             ContractUsers.methods.setNewUser(item.address,hashstr).send({from: web3.eth.defaultAccount}).then(function(error, accounts) {console.log(error)});
-
+            saved=true;
 
             }
 
           });
         }
-        res.render('approveUser', { data:data, query:req.query });
+        res.render('approveUser', { data:data, query:req.query, saved:saved });
         });
     });
 
@@ -377,5 +436,6 @@ function makeNounce() {
   for (var i = 0; i < 9; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-  return text;
+  //return text;
+  return "AAAAAAAAA"
 }

@@ -49,25 +49,6 @@ web3.eth.getAccounts(function(error, accounts) {
 
 var abiTickets= '[\
     {\
-      "constant": true,\
-      "inputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "events",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "view",\
-      "type": "function"\
-    },\
-    {\
       "inputs": [\
         {\
           "name": "_userContract",\
@@ -109,7 +90,7 @@ var abiTickets= '[\
       "outputs": [\
         {\
           "name": "",\
-          "type": "string"\
+          "type": "bytes32"\
         }\
       ],\
       "payable": false,\
@@ -163,15 +144,7 @@ var abiTickets= '[\
         },\
         {\
           "name": "_nome",\
-          "type": "string"\
-        },\
-        {\
-          "name": "_startTimeStamp",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "_endTimeStamp",\
-          "type": "uint256"\
+          "type": "bytes32"\
         },\
         {\
           "name": "_ticketsType",\
@@ -303,10 +276,10 @@ var abiUsers = '[\
     }\
   ]';
 
-ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0x3a2d0473907595d640d5730a270733caac1b4325');
-ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0xd72145b684a4add805885fb9a17814bff79787ff');
+ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0xbf8722cda164fbc6d9ccf8b3ff4944f7de29be8a');
+ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0xd52fec107ebb3e238aab7c3b9b81be86673e9cdc');
 
-console.log(ContractTickets);
+//console.log(ContractTickets);
 
 
 });

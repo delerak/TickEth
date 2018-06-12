@@ -1,4 +1,9 @@
 
+{{#if saved}}
+<div class="row" style="background-color:green;color:white;justify-content: center;">User saved</div>
+{{/if}}
+<br><br>
+<div class="row">
 <div class="col-sm-3"></div>
 <form class="col-sm-6" action="/addUser" method="POST">
 
@@ -26,5 +31,6 @@
 <label for="">Document verification</label>
 <input type="file" class="form-control-file"  >
 </div>
-<input type="submit" class="form-control-file" value="Invia">
+<input type="submit" class="form-control-file btn btn-primary" value="Send">
 </form>
+</div>
