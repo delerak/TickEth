@@ -15,6 +15,8 @@ contract BuyTickets{
     percTopOwner=_percTopOwner;
   }
   function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity) payable public returns (uint) {
-    tickets.buy(bytes32 idEvent, bytes32 typeTicket, uint quantity);
+    uint pay = msg.value*100/saleFee/100;
+    tickets.buy(idEvent, typeTicket, quantity, msg.sender ).value(msg.value-pay));
+    //return money if doesn't works
   }
 }

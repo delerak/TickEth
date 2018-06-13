@@ -42,8 +42,8 @@ contract Tickets {
       return eventStore[events[i]].sold[addr].nticket;
     }
     function addReseller(address addr, uint perc, uint ntickets, uint i ) public{
-      eventStore[events[i]].reseller[addr].percreturn=perc;
-      eventStore[events[i]].reseller[addr].ntickets=ntickets;
+      eventStore[events[i]].resellers[addr].percreturn=perc;
+      eventStore[events[i]].resellers[addr].ntickets=ntickets;
     }
     function addEvent(bytes32 _id, bytes32 _nome, bytes32[] _ticketsType, uint _maxTicketPerson, uint[] _ticketPrices, uint[] _ticketLeft) public
     //function addEvent(bytes32 _id, bytes32 _nome,  uint _maxTicketPerson) public
@@ -65,24 +65,32 @@ contract Tickets {
       owner = msg.sender;
     }
 
-   function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity) payable public returns (uint) {
+   function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity, address sendFrom) payable public returns (uint) {
     uint money = msg.value;
-    require (users.getUserHash(msg.sender)!=0);
-    //require (block.timestamp > evento.startTimeStamp);
-    //require (block.timestamp < evento.endTimeStamp);
-    require(evento.ticketPricesMap[typeTicket]*quantity == money);
+    address sender;
+
 
     //require(quantity <= evento.maxTicketPerson);
     //require(evento.sold[msg.sender].nticket+quantity<=evento.maxTicketPerson);
     if(eventStore[idEvent].resellersAddr.length>0){
-      require(eventStore[idEvent].reseller[msg.sender].ntickets!=0));
-    }
-    if(eventStore[idEvent].sold[msg.sender].nticket>0){
-      eventStore[idEvent].sold[msg.sender].ticketQuantity[typeTicket]+=quantity;
-      eventStore[idEvent].sold[msg.sender].nticket+=quantity;
+      require(eventStore[idEvent].resellers[msg.sender].ntickets>=quantity);
+      sender=sendFrom;
+      eventStore[idEvent].resellers[msg.sender].ntickets-=quantity;
+
     }else{
-      eventStore[idEvent].sold[msg.sender].ticketQuantity[typeTicket]=quantity;
-      eventStore[idEvent].sold[msg.sender].nticket=quantity;
+
+      //require (block.timestamp > evento.startTimeStamp);
+      //require (block.timestamp < evento.endTimeStamp);
+      require(eventStore[idEvent].ticketPricesMap[typeTicket]*quantity == money);
+      sender=msg.sender;
+    }
+    require (users.getUserHash(sender)!=0);
+    if(eventStore[idEvent].sold[sender].nticket>0){
+      eventStore[idEvent].sold[sender].ticketQuantity[typeTicket]+=quantity;
+      eventStore[idEvent].sold[sender].nticket+=quantity;
+    }else{
+      eventStore[idEvent].sold[sender].ticketQuantity[typeTicket]=quantity;
+      eventStore[idEvent].sold[sender].nticket=quantity;
     }
 
   }
