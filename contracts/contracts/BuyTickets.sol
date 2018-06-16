@@ -6,17 +6,25 @@ contract BuyTickets{
   address owner;
   uint ntickets;
   uint percTopOwner;
-  Tickets tickets = Tickets(ticketsContract);
-  function BuyTickets(address _ticketsContract, address reseller, uint _ntickets, uint _percTopOwner) public{
-    usersContract=_ticketsContract;
+  bytes32 idEvent;
+  function BuyTickets(address _ticketsContract, address reseller, uint _ntickets, uint _percTopOwner, bytes32 _idEvent) public{
+    ticketsContract=_ticketsContract;
     owner=reseller;
     topOwner=msg.sender;
-    nticket=_ntickets;
+    ntickets=_ntickets;
     percTopOwner=_percTopOwner;
+    idEvent=_idEvent;
   }
-  function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity) payable public returns (uint) {
-    uint pay = msg.value*100/saleFee/100;
-    tickets.buy(idEvent, typeTicket, quantity, msg.sender ).value(msg.value-pay));
+  function getidEvent() public returns (bytes32){
+    return idEvent;
+  }
+  function getntickets() public returns (uint){
+    return ntickets;
+  }
+  Tickets tickets = Tickets(ticketsContract);
+  function buy(bytes32 typeTicket, uint quantity) payable public returns (uint) {
+    //uint pay = msg.value*100/percTopOwner/100;
+    tickets.buy.value(msg.value)(idEvent, typeTicket, quantity, msg.sender );
     //return money if doesn't works
   }
 }

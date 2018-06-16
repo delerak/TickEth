@@ -16,7 +16,16 @@ sc.setNewUser('123','1234').then(function(res){console.log(res);})
 
 sct.getEventsSize.call(0).then(function(res){console.log(res);})
 
-sct.getEventsNames.call(0).then(function(res){console.log(web3.toAscii(res));})
+sct.getEventName.call(0).then(function(res){console.log(web3.toAscii(res));})
 Concerto Arctic Monkeys
 
 sct.getEventTicketBought.call(0).then(function(res){console.log(res);})
+
+sct.addReseller.call(0x04383a0240B1A991417f1995aC4d24840f4a8Ea9, 10, 30, 0).then(function(res){console.log(res);})
+
+BuyTickets.new(sct.address, 0x04383a0240B1A991417f1995aC4d24840f4a8Ea9, 30, 10, 0x5b2278d2f2645368af506c94).then(function(res) { sctb = BuyTickets.at(res.address) })
+
+
+sctb.buy('zona A',1).then(function(res){console.log(res);})
+
+sctb.buy('zona A',1, {value:web3.toWei(1, 'ether')}).then(function(res){console.log(res);})

@@ -13,5 +13,4 @@ contract Users{
       require(msg.sender==owner);
       UserHash[who]=hash;
     }
-
 }

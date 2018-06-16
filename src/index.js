@@ -42,6 +42,20 @@ MongoClient.connect(url, function(err, db) {
 
     var abiTickets= '[\
     {\
+      "constant": true,\
+      "inputs": [],\
+      "name": "owner",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "address"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "view",\
+      "type": "function"\
+    },\
+    {\
       "inputs": [\
         {\
           "name": "_userContract",\
@@ -54,12 +68,7 @@ MongoClient.connect(url, function(err, db) {
     },\
     {\
       "constant": false,\
-      "inputs": [\
-        {\
-          "name": "i",\
-          "type": "uint256"\
-        }\
-      ],\
+      "inputs": [],\
       "name": "getEventsSize",\
       "outputs": [\
         {\
@@ -75,8 +84,8 @@ MongoClient.connect(url, function(err, db) {
       "constant": false,\
       "inputs": [\
         {\
-          "name": "i",\
-          "type": "uint256"\
+          "name": "id",\
+          "type": "bytes32"\
         }\
       ],\
       "name": "getEventName",\
@@ -94,8 +103,8 @@ MongoClient.connect(url, function(err, db) {
       "constant": false,\
       "inputs": [\
         {\
-          "name": "i",\
-          "type": "uint256"\
+          "name": "id",\
+          "type": "bytes32"\
         }\
       ],\
       "name": "getEventTicketPerPerson",\
@@ -113,11 +122,98 @@ MongoClient.connect(url, function(err, db) {
       "constant": false,\
       "inputs": [\
         {\
-          "name": "i",\
-          "type": "uint256"\
+          "name": "id",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "addr",\
+          "type": "address"\
         }\
       ],\
       "name": "getEventTicketBought",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "addr",\
+          "type": "address"\
+        },\
+        {\
+          "name": "perc",\
+          "type": "uint256"\
+        },\
+        {\
+          "name": "ntickets",\
+          "type": "uint256"\
+        },\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "name": "addReseller",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "name": "getResellerLength",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "name": "getResellerfirstAddr",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "address"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "name": "getResellerTicketsAv",\
       "outputs": [\
         {\
           "name": "",\
@@ -136,7 +232,7 @@ MongoClient.connect(url, function(err, db) {
           "type": "bytes32"\
         },\
         {\
-          "name": "_nome",\
+          "name": "_name",\
           "type": "bytes32"\
         },\
         {\
@@ -176,6 +272,10 @@ MongoClient.connect(url, function(err, db) {
         {\
           "name": "quantity",\
           "type": "uint256"\
+        },\
+        {\
+          "name": "sendFrom",\
+          "type": "address"\
         }\
       ],\
       "name": "buy",\
@@ -269,8 +369,8 @@ MongoClient.connect(url, function(err, db) {
     }\
   ]';
 
-  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0xbf8722cda164fbc6d9ccf8b3ff4944f7de29be8a');
-  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xd52fec107ebb3e238aab7c3b9b81be86673e9cdc');
+  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0x9f39a357db82faccf8361fa5c6d4b9edc2b68a68');
+  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0x4737da4f9ca6ee1e2ee1752a7ae7976dc8cc38b9');
 
   //console.log(ContractUsers);
   /*ContractUsers.methods.setNewUser(address, web3.utils.asciiToHex('121212'), {gas: 999999}).call().then(function(err,result){
@@ -303,6 +403,29 @@ app.post('/', (req, res) => {
   //console.log(req.body);
   //ContractTickets.methods.buy(req.body.id[0], req.body.type[0], req.type.quantity[0]).send({from:web3.eth.defaultAccount, to:'0x2ffe4f0e841655d2711449dfc5a756faaaf84482', value:"100000"});
   //res.render('main');
+})
+app.get('/reseller1', (req, res) => {
+  dbo.collection("events").find().toArray(function(err, data) {
+    if (err) throw err;
+      let eventsi=[];
+
+      data.forEach(function(item, index){
+          let dict={}
+          item.ticketstype=item.ticketstype.split(", ");
+          item.ticketsprice=item.ticketsprice.split(", ");
+          for(i=0;i<item.ticketstype.length;i++){
+            dict[item.ticketstype[i]]=item.ticketsprice[i];
+          }
+          item.ticketsdict=dict;
+          eventsi.push(item);
+      })
+      //console.log(eventsi);
+      res.render('reseller1', {
+        events:eventsi
+      })
+
+  })
+
 })
 app.get('/', (req, res) => {
 

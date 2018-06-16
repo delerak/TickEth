@@ -23,7 +23,7 @@ function buy(item){
   console.log(type);
   console.log(quantity);
   console.log("id "+"0x"+id);
-  ContractTickets.buy("0x"+id, type, quantity, {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', value: web3.toWei(quantity*price, 'ether')},function(error, result){
+  ContractTickets.buy("0x"+id, type, quantity, web3.eth.defaultAccount, {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', gas: 6000000 ,value: web3.toWei(quantity*price, 'ether')},function(error, result){
      if(!error)
          console.log(result)
      else
@@ -47,156 +47,256 @@ web3.eth.getAccounts(function(error, accounts) {
   });
 
 
-var abiTickets= '[\
-    {\
-      "inputs": [\
-        {\
-          "name": "_userContract",\
-          "type": "address"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "constructor"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "i",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "getEventsSize",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "i",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "getEventName",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "i",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "getEventTicketPerPerson",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "i",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "getEventTicketBought",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "_id",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "_nome",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "_ticketsType",\
-          "type": "bytes32[]"\
-        },\
-        {\
-          "name": "_maxTicketPerson",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "_ticketPrices",\
-          "type": "uint256[]"\
-        },\
-        {\
-          "name": "_ticketLeft",\
-          "type": "uint256[]"\
-        }\
-      ],\
-      "name": "addEvent",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "idEvent",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "typeTicket",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "quantity",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "buy",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": true,\
-      "stateMutability": "payable",\
-      "type": "function"\
-    }\
-  ]';
+  var abiTickets= '[\
+  {\
+    "constant": true,\
+    "inputs": [],\
+    "name": "owner",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "address"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "view",\
+    "type": "function"\
+  },\
+  {\
+    "inputs": [\
+      {\
+        "name": "_userContract",\
+        "type": "address"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "constructor"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [],\
+    "name": "getEventsSize",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "uint256"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "getEventName",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "getEventTicketPerPerson",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "uint256"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "addr",\
+        "type": "address"\
+      }\
+    ],\
+    "name": "getEventTicketBought",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "uint256"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "addr",\
+        "type": "address"\
+      },\
+      {\
+        "name": "perc",\
+        "type": "uint256"\
+      },\
+      {\
+        "name": "ntickets",\
+        "type": "uint256"\
+      },\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "addReseller",\
+    "outputs": [],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "getResellerLength",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "uint256"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "getResellerfirstAddr",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "address"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "getResellerTicketsAv",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "uint256"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "_id",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "_name",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "_ticketsType",\
+        "type": "bytes32[]"\
+      },\
+      {\
+        "name": "_maxTicketPerson",\
+        "type": "uint256"\
+      },\
+      {\
+        "name": "_ticketPrices",\
+        "type": "uint256[]"\
+      },\
+      {\
+        "name": "_ticketLeft",\
+        "type": "uint256[]"\
+      }\
+    ],\
+    "name": "addEvent",\
+    "outputs": [],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "idEvent",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "typeTicket",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "quantity",\
+        "type": "uint256"\
+      },\
+      {\
+        "name": "sendFrom",\
+        "type": "address"\
+      }\
+    ],\
+    "name": "buy",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "uint256"\
+      }\
+    ],\
+    "payable": true,\
+    "stateMutability": "payable",\
+    "type": "function"\
+  }\
+]';
 var abiUsers = '[\
     {\
       "constant": true,\
@@ -276,8 +376,8 @@ var abiUsers = '[\
     }\
   ]';
 
-ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0xbf8722cda164fbc6d9ccf8b3ff4944f7de29be8a');
-ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0xd52fec107ebb3e238aab7c3b9b81be86673e9cdc');
+ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0x9f39a357db82faccf8361fa5c6d4b9edc2b68a68');
+ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0x4737da4f9ca6ee1e2ee1752a7ae7976dc8cc38b9');
 
 //console.log(ContractTickets);
 
