@@ -23,6 +23,7 @@ function buy(item){
   console.log(type);
   console.log(quantity);
   console.log("id "+"0x"+id);
+      console.log(""+web3.toWei(quantity*price, 'ether'));
   ContractTickets.buy("0x"+id, type, quantity, web3.eth.defaultAccount, {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', gas: 6000000 ,value: web3.toWei(quantity*price, 'ether')},function(error, result){
      if(!error)
          console.log(result)
@@ -376,8 +377,8 @@ var abiUsers = '[\
     }\
   ]';
 
-ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0x9f39a357db82faccf8361fa5c6d4b9edc2b68a68');
-ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0x4737da4f9ca6ee1e2ee1752a7ae7976dc8cc38b9');
+ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0xb085d68e19c25f512e4d35ba8989a81d43da49ea');
+ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0xdb9c42bcb95ac09f345eaaf84a8c0ab2b5b862c7');
 
 //console.log(ContractTickets);
 

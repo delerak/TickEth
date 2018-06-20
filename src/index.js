@@ -369,8 +369,8 @@ MongoClient.connect(url, function(err, db) {
     }\
   ]';
 
-  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0x9f39a357db82faccf8361fa5c6d4b9edc2b68a68');
-  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0x4737da4f9ca6ee1e2ee1752a7ae7976dc8cc38b9');
+  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0xb085d68e19c25f512e4d35ba8989a81d43da49ea');
+  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xdb9c42bcb95ac09f345eaaf84a8c0ab2b5b862c7');
 
   //console.log(ContractUsers);
   /*ContractUsers.methods.setNewUser(address, web3.utils.asciiToHex('121212'), {gas: 999999}).call().then(function(err,result){
@@ -487,7 +487,8 @@ app.post('/addEvents',(req, res) => {
       ticktype[i]=web3.utils.asciiToHex(ticktype[i]);
     }
     for(i=0;i<tickprices.length;i++){
-      tickprices[i]=parseInt(tickprices[i]);
+      tickprices[i]=web3.utils.toWei(tickprices[i].replace(/\s/g, ''), 'ether');
+      console.log("price: "+tickprices[i]);
     }
     //hextoasciii sull'id?
     var id="0x"+res2.insertedId

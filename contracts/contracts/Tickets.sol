@@ -5,7 +5,7 @@ contract Tickets {
     address public owner;
     bytes32[] events;
     mapping(bytes32 => eventObject) eventStore;
-    Users users = Users(usersContract);
+    Users users;
     struct buyer{
       mapping (bytes32 => uint) ticketQuantity;//type->quantity
       uint nTickets;
@@ -29,9 +29,14 @@ contract Tickets {
       mapping (bytes32 => uint) ticketPricesMap;
     }
     //mapping (uint=> eventObject) public eventsmap;
-
+    function getUserHash(address user) public returns (bytes32){
+      return users.getUserHash(user);
+    }
     function getEventsSize() public returns (uint){
       return events.length;
+    }
+    function getTicketPrice(bytes32 id) public returns (uint){
+      return eventStore[id].ticketPrices[0];
     }
     function getEventName(bytes32 id) public returns (bytes32){
       return eventStore[id].name;
@@ -71,6 +76,7 @@ contract Tickets {
     }
     function Tickets(address _userContract) public{
       usersContract=_userContract;
+      users=Users(usersContract);
       owner = msg.sender;
     }
 
@@ -86,12 +92,14 @@ contract Tickets {
     }else{
       //require (block.timestamp > evento.startTimeStamp);
       //require (block.timestamp < evento.endTimeStamp);
-      //require(eventStore[idEvent].ticketPricesMap[typeTicket]*quantity == money);
+      require(eventStore[idEvent].ticketPricesMap[typeTicket]*quantity <= money);
       sender=msg.sender;
     }
+    require(eventStore[idEvent].sold[sender].nTickets+quantity<=eventStore[idEvent].maxTicketPerson);
     require (users.getUserHash(sender)!=0);
     eventStore[idEvent].sold[sender].ticketQuantity[typeTicket]+=quantity;
     eventStore[idEvent].sold[sender].nTickets+=quantity;
+
   }
 
 

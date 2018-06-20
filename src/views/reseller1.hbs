@@ -24,6 +24,7 @@
     console.log(type);
     console.log(quantity);
     console.log("id "+"0x"+id);
+    console.log(""+web3.toWei(quantity*price, 'ether'));
     ContractTicketsRes.buy(type, quantity, {from:web3.eth.defaultAccount, to:'0xd00237c4422184bb0e831584d6f648cf21d10268', value: web3.toWei(quantity*price, 'ether')},function(error, result){
        if(!error)
            console.log(result)
