@@ -1,4 +1,4 @@
-<div style="background-color:#555555;height:100%;width:100%;">
+<div style="background-color:#555555;">
   <script>
   console.log("start")
   let events;
@@ -25,7 +25,7 @@
     console.log(quantity);
     console.log("id "+"0x"+id);
     console.log(""+web3.toWei(quantity*price, 'ether'));
-    ContractTicketsRes.buy(type, quantity, {from:web3.eth.defaultAccount, to:'0xd00237c4422184bb0e831584d6f648cf21d10268', value: web3.toWei(quantity*price, 'ether')},function(error, result){
+    ContractTicketsRes.buy(type, quantity, {from:web3.eth.defaultAccount, to:'0x5fcae71d09704cb83a6812e645bcc49d214c9f1b', gas: 6000000, value: web3.toWei(quantity*price, 'ether')},function(error, result){
        if(!error)
            console.log(result)
        else
@@ -103,7 +103,7 @@
   ]';
 
 
-  ContractTicketsRes =  web3.eth.contract(JSON.parse(abiTicketsRes)).at('0xd00237c4422184bb0e831584d6f648cf21d10268');
+  ContractTicketsRes =  web3.eth.contract(JSON.parse(abiTicketsRes)).at('0x5fcae71d09704cb83a6812e645bcc49d214c9f1b');
 
   //console.log(ContractTickets);
 
@@ -161,7 +161,7 @@
   <div class="row">
   {{#each events}}
   <div id="myModal"></div>
-  <div class="card col-sm-3" style="width: 18rem;">
+  <div class="card col-sm-2" style="width: 18rem;margin:10px;">
     <div class="card-body">
       <h5 class="card-title">{{name}}</h5>
       <h6 class="card-subtitle mb-2 text-muted">{{date}}</h6>

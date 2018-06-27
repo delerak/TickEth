@@ -370,7 +370,7 @@ MongoClient.connect(url, function(err, db) {
   ]';
 
   ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0xb085d68e19c25f512e4d35ba8989a81d43da49ea');
-  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xdb9c42bcb95ac09f345eaaf84a8c0ab2b5b862c7');
+  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0x3b06cecdb7e5833854e42c1a6dbd4bc4781bdcfd');
 
   //console.log(ContractUsers);
   /*ContractUsers.methods.setNewUser(address, web3.utils.asciiToHex('121212'), {gas: 999999}).call().then(function(err,result){

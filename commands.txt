@@ -21,9 +21,9 @@ Concerto Arctic Monkeys
 
 sct.getEventTicketBought.call(0).then(function(res){console.log(res);})
 
-sct.addReseller.call(0x04383a0240B1A991417f1995aC4d24840f4a8Ea9, 10, 30, 0).then(function(res){console.log(res);})
+sct.addReseller(sctb.address, 10, 30, '0x5b325d701bb1a10ae328a981').then(function(res){console.log(res);})
 
-BuyTickets.new(sct.address, 0x04383a0240B1A991417f1995aC4d24840f4a8Ea9, 30, 10, 0x5b2278d2f2645368af506c94).then(function(res) { sctb = BuyTickets.at(res.address) })
+BuyTickets.new(sct.address, 0x04383a0240B1A991417f1995aC4d24840f4a8Ea9, 30, 10, 0x5b2a74ae1d7ac32ab34dd75d).then(function(res) { sctb = BuyTickets.at(res.address) })
 
 
 sctb.buy('zona A',1).then(function(res){console.log(res);})

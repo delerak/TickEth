@@ -88,15 +88,19 @@ contract Tickets {
     if(eventStore[idEvent].resellersAddr.length>0){
       require(eventStore[idEvent].resellers[msg.sender].nTickets>=quantity);
       sender=sendFrom;
-      eventStore[idEvent].resellers[msg.sender].nTickets-=quantity;
+      eventStore[idEvent].resellers[msg.sender].nTickets-=quantity;//va spostato in caso una require vada male
     }else{
       //require (block.timestamp > evento.startTimeStamp);
       //require (block.timestamp < evento.endTimeStamp);
       require(eventStore[idEvent].ticketPricesMap[typeTicket]*quantity <= money);
       sender=msg.sender;
     }
-    require(eventStore[idEvent].sold[sender].nTickets+quantity<=eventStore[idEvent].maxTicketPerson);
-    require (users.getUserHash(sender)!=0);
+    if(eventStore[idEvent].sold[sender].nTickets>0){
+      require(eventStore[idEvent].sold[sender].nTickets+quantity<=eventStore[idEvent].maxTicketPerson);//scazza
+    }else{
+      quantity<=eventStore[idEvent].maxTicketPerson;
+    }
+    require(users.getUserHash(sender)!=0);
     eventStore[idEvent].sold[sender].ticketQuantity[typeTicket]+=quantity;
     eventStore[idEvent].sold[sender].nTickets+=quantity;
 
