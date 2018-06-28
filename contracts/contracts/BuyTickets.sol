@@ -8,6 +8,17 @@ contract BuyTickets{
   uint percTopOwner;
   bytes32 idEvent;
   Tickets tickets;
+  uint fund;
+  function withdraw() public returns (bool){
+    uint amount=fund;
+    require(msg.sender==owner);
+    fund=0;
+    if (!msg.sender.send(amount)) {
+      fund = amount;
+      return false;
+    }
+    return true;
+  }
   function BuyTickets(address _ticketsContract, address reseller, uint _ntickets, uint _percTopOwner, bytes32 _idEvent) public{
     ticketsContract=_ticketsContract;
     owner=reseller;
@@ -15,6 +26,7 @@ contract BuyTickets{
     ntickets=_ntickets;
     percTopOwner=_percTopOwner;
     idEvent=_idEvent;
+    fund=0;
     tickets= Tickets(ticketsContract);
   }
   function getidEvent() public returns (bytes32){
@@ -28,8 +40,8 @@ contract BuyTickets{
   }
 
   function buy(bytes32 typeTicket, uint quantity) payable public returns (uint) {
-    //uint pay = msg.value*100/percTopOwner/100;
-    tickets.buy.value(msg.value)(idEvent, typeTicket, quantity, msg.sender );
-    //return money if doesn't works
+    uint pay = msg.value*100/percTopOwner/100;
+    fund+=pay;
+    tickets.buy.value(msg.value-pay)(idEvent, typeTicket, quantity, msg.sender );
   }
 }

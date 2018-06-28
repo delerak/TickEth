@@ -28,6 +28,17 @@ contract Tickets {
       mapping (address => buyer) sold;
       mapping (bytes32 => uint) ticketPricesMap;
     }
+    uint fund;
+    function withdraw() public returns (bool){
+      uint amount=fund;
+      require(msg.sender==owner);
+      fund=0;
+      if (!msg.sender.send(amount)) {
+        fund = amount;
+        return false;
+      }
+      return true;
+    }
     //mapping (uint=> eventObject) public eventsmap;
     function getUserHash(address user) public returns (bytes32){
       return users.getUserHash(user);
@@ -78,32 +89,45 @@ contract Tickets {
       usersContract=_userContract;
       users=Users(usersContract);
       owner = msg.sender;
+      fund=0;
     }
 
    function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity, address sendFrom) payable public returns (uint) {
     uint money = msg.value;
     address sender;
+    //if revert()
     //require(quantity <= evento.maxTicketPerson);
     //require(evento.sold[msg.sender].nticket+quantity<=evento.maxTicketPerson);
     if(eventStore[idEvent].resellersAddr.length>0){
-      require(eventStore[idEvent].resellers[msg.sender].nTickets>=quantity);
+      if(eventStore[idEvent].resellers[msg.sender].nTickets<quantity || quantity==0){
+        revert();
+      }
       sender=sendFrom;
       eventStore[idEvent].resellers[msg.sender].nTickets-=quantity;//va spostato in caso una require vada male
     }else{
       //require (block.timestamp > evento.startTimeStamp);
       //require (block.timestamp < evento.endTimeStamp);
-      require(eventStore[idEvent].ticketPricesMap[typeTicket]*quantity <= money);
+      if(eventStore[idEvent].ticketPricesMap[typeTicket]*quantity > money || quantity==0){
+        revert();
+      }
       sender=msg.sender;
     }
     if(eventStore[idEvent].sold[sender].nTickets>0){
-      require(eventStore[idEvent].sold[sender].nTickets+quantity<=eventStore[idEvent].maxTicketPerson);//scazza
+      if(eventStore[idEvent].sold[sender].nTickets+quantity>eventStore[idEvent].maxTicketPerson){//scazza
+          revert();
+      }
     }else{
-      quantity<=eventStore[idEvent].maxTicketPerson;
+      if(quantity>eventStore[idEvent].maxTicketPerson){
+          revert();
+      }
+
     }
-    require(users.getUserHash(sender)!=0);
+    if(users.getUserHash(sender)==0){
+      revert();
+    }
     eventStore[idEvent].sold[sender].ticketQuantity[typeTicket]+=quantity;
     eventStore[idEvent].sold[sender].nTickets+=quantity;
-
+    fund+=money;
   }
 
 
