@@ -4,6 +4,7 @@ const express = require('express')
 const exphbs = require('express-handlebars')
 const bodyParser= require('body-parser')
 const crypto = require("crypto")
+
 const TextEncoder = require('text-encoding').TextEncoder;
 const Web3 = require('web3');
 const app = express()
@@ -421,7 +422,7 @@ app.get('/reseller1', (req, res) => {
       })
       //console.log(eventsi);
       res.render('reseller1', {
-        events:eventsi
+        events:eventsi.reverse()
       })
 
   })
@@ -445,11 +446,15 @@ app.get('/', (req, res) => {
       })
       //console.log(eventsi);
       res.render('main', {
-        events:eventsi
+        events:eventsi.reverse()
       })
 
   })
 
+})
+app.get('/trading', (req, res) => {
+
+  res.render('trade')
 })
 app.get('/user', (req, res) => {
   res.render('user')
@@ -476,7 +481,7 @@ app.post('/user', (req, res) => {
 
 })
 app.post('/addEvents',(req, res) => {
-  var myobj = {name: req.body.name, date: req.body.date, desc: req.body.description, place: req.body.place, ticketstype:req.body.ticketstype, ticketsprice:req.body.ticketsprice, maxticket:req.body.maxticket  }
+  var myobj = {name: req.body.name, date: req.body.date, desc: req.body.description, place: req.body.place, ticketstype:req.body.ticketstype, ticketsprice:req.body.ticketsprice, maxticket:req.body.maxticket, image:req.body.image, bought:[]  }
   dbo.collection("events").insertOne(myobj, function(err, res2) {
     if (err) throw err;
     console.log(res2);
@@ -544,7 +549,6 @@ app.get('/validateUsers', (req, res) => {
             console.log("address: "+ item.address);
             ContractUsers.methods.setNewUser(item.address,hashstr).send({from: web3.eth.defaultAccount}).then(function(error, accounts) {console.log(error)});
             saved=true;
-
             }
 
           });
@@ -552,7 +556,14 @@ app.get('/validateUsers', (req, res) => {
         res.render('approveUser', { data:data, query:req.query, saved:saved });
         });
     });
-
+app.post('/bought', (req, res) => {
+  console.log(req.data);
+  dbo.collection("events").update({'_id':req.data._id}, {$push:{'bought':res.data}},
+  function (err, result) {
+      if (err) throw err;
+      console.log(result);
+   });
+});
 function makeNounce() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

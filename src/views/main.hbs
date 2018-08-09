@@ -2,8 +2,8 @@
 console.log("start")
 let events;
 
-function buy(item){
-  console.log(item)
+function buy(item, fullItem){
+  console.log(JSON.parse(unescape(fullItem)));
   var id, type, quantity,price;
   tickets=$("#modal"+item+" input");
   console.log(tickets)
@@ -23,11 +23,21 @@ function buy(item){
   console.log(type);
   console.log(quantity);
   console.log("id "+"0x"+id);
-      console.log(""+web3.toWei(quantity*price, 'ether'));
+  console.log(""+web3.toWei(quantity*price, 'ether'));
   ContractTickets.buy("0x"+id, type, quantity, web3.eth.defaultAccount, {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', gas: 6000000 ,value: web3.toWei(quantity*price, 'ether')},function(error, result){
-     if(!error)
-         console.log(result)
-     else
+     if(!error){
+         console.log(result);
+         $.ajax({
+  					type: 'POST',
+  					data: JSON.stringify(fullItem),
+  			        contentType: 'application/json',
+                        url: '/bought',
+                        success: function(data) {
+                            console.log('success');
+                            console.log(JSON.stringify(data));
+                        }
+          });
+    }else
          console.error(error);
  });
 
@@ -406,13 +416,15 @@ function doModal(placementId, heading, formContent, strSubmitFunc, btnText,idMod
     events=JSON.parse("{{toJSON events}}".replace(/&quot;/g, '\"'))
     for (i=0;i<events.length;i++){
       if(events[i]._id==idModal){
+
         for (const [key, value] of Object.entries(events[i].ticketsdict)) {
           html+="<br>Zone: "+key+"<br>Price: "+value+"<br><input type='hidden' name='type' value='"+key+"'></input> <input name='quantity' placeholder='2'></input><input name='price' type='hidden' value='"+value+"'></input>";
         }
+        break;
       }
     }
-    /**/
-    html += '<br><br><button class="btn btn-default btn-adopt btn-success" data-id="'+idModal+'" data-dismiss="modal" onClick="hideModal();buy(\''+idModal+'\')">Buy</button></form>'
+    console.log(JSON.stringify(events[i]));
+    html += '<br><br><button class="btn btn-default btn-adopt btn-success" data-id="'+idModal+'" data-dismiss="modal" onClick="hideModal();buy(\''+idModal+'\', \''+ escape(JSON.stringify(events[i]))+'\')">Buy</button></form>'
     html += '</div>';
     html += '<div class="modal-footer">';
     if (btnText!='') {
@@ -434,17 +446,30 @@ function doModal(placementId, heading, formContent, strSubmitFunc, btnText,idMod
 </script>
 
 <div class="row">
+
 {{#each events}}
 <div id="myModal"></div>
-<div class="card col-sm-3" style="width: 18rem;">
-  <div class="card-body">
-    <h5 class="card-title">{{name}}</h5>
-    <h6 class="card-subtitle mb-2 text-muted">{{date}}</h6>
-    <p class="card-text">{{desc}}
-    </p>
-    <a href="#" class="card-link" onClick="doModal('myModal','', '{{name}}', 'doModal()','{{name}}','{{_id}}' )">Buy Ticket</a>
-    <a href="#" class="card-link">details</a>
+
+<div class="card" style="margin:30px;width:500px;">
+      <div class="row no-gutters">
+          <div class="col-auto">
+            {{#if image}}
+              <img src="{{image}}" class="img-fluid" alt="" height="200" width="200">
+              {{else}}
+              <img src="//placehold.it/200" class="img-fluid" alt="">
+              {{/if}}
+          </div>
+          <div class="col" style="padding:10px;">
+              <div class="card-block px-2">
+                <h5 class="card-title">{{name}}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{date}}</h6>
+                <p class="card-text">{{desc}}
+                </p>
+                <a href="#" class="card-link" onClick="doModal('myModal','', '{{name}}', 'doModal()','{{name}}','{{_id}}' )">Buy Ticket</a>
+                <a href="#" class="card-link">details</a>
+              </div>
+          </div>
+      </div>
   </div>
-</div>
 {{/each}}
 </div>
