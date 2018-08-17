@@ -1,0 +1,27 @@
+{{log this}}
+<div class="row">
+{{#each events}}
+<div id="myModal"></div>
+<div class="card" style="margin:30px;width:500px;">
+  <div class="row no-gutters">
+      <div class="col-auto">
+        {{#if image}}
+          <img src="{{image}}" class="img-fluid" alt="" height="200" width="200">
+          {{else}}
+          <img src="//placehold.it/200" class="img-fluid" alt="">
+          {{/if}}
+      </div>
+      <div class="col" style="padding:10px;">
+          <div class="card-block px-2">
+            <h5 class="card-title">{{name}}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{{date}}</h6>
+            <p class="card-text">{{desc}}
+            </p>
+            <a href="#" class="card-link" onClick="doModal('myModal','', '{{name}}', 'doModal()','{{name}}','{{_id}}' )">Buy Ticket</a>
+            <a href="#" class="card-link">details</a>
+          </div>
+      </div>
+  </div>
+</div>
+{{/each}}
+</div>

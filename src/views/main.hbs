@@ -3,6 +3,11 @@ console.log("start")
 let events;
 
 function buy(item, fullItem){
+  var pwd = prompt("Enter the password for your ticket", "");
+
+  if (pwd == null || pwd == "") {
+      return;
+  }
   console.log(JSON.parse(unescape(fullItem)));
   var id, type, quantity,price;
   tickets=$("#modal"+item+" input");
@@ -24,7 +29,8 @@ function buy(item, fullItem){
   console.log(quantity);
   console.log("id "+"0x"+id);
   console.log(""+web3.toWei(quantity*price, 'ether'));
-  ContractTickets.buy("0x"+id, type, quantity, web3.eth.defaultAccount, {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', gas: 6000000 ,value: web3.toWei(quantity*price, 'ether')},function(error, result){
+
+  ContractTickets.buy("0x"+id, type, quantity, web3.eth.defaultAccount, web3.sha3(pwd+""+id, {encoding: 'hex'}),  {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', gas: 6000000 ,value: web3.toWei(quantity*price, 'ether')},function(error, result){
      if(!error){
          console.log(result);
          $.ajax({
@@ -86,8 +92,188 @@ web3.eth.getAccounts(function(error, accounts) {
   },\
   {\
     "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "ticketType",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "price",\
+        "type": "uint256"\
+      },\
+      {\
+        "name": "quantity",\
+        "type": "uint256"\
+      }\
+    ],\
+    "name": "sellTicket",\
+    "outputs": [],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "ticketType",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "quantity",\
+        "type": "uint256"\
+      }\
+    ],\
+    "name": "cancelSellingTicket",\
+    "outputs": [],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "ticketType",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "quantity",\
+        "type": "uint256"\
+      },\
+      {\
+        "name": "i",\
+        "type": "uint256"\
+      }\
+    ],\
+    "name": "buySecond",\
+    "outputs": [],\
+    "payable": true,\
+    "stateMutability": "payable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "perc",\
+        "type": "uint256"\
+      }\
+    ],\
+    "name": "setEventRefund",\
+    "outputs": [],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "EventId",\
+        "type": "bytes32"\
+      },\
+      {\
+        "name": "user",\
+        "type": "address"\
+      },\
+      {\
+        "name": "perc",\
+        "type": "uint256"\
+      }\
+    ],\
+    "name": "setUserRefund",\
+    "outputs": [],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "idEvento",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "getRefund",\
+    "outputs": [],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [],\
+    "name": "withdraw",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "bool"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "user",\
+        "type": "address"\
+      }\
+    ],\
+    "name": "getUserHash",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
     "inputs": [],\
     "name": "getEventsSize",\
+    "outputs": [\
+      {\
+        "name": "",\
+        "type": "uint256"\
+      }\
+    ],\
+    "payable": false,\
+    "stateMutability": "nonpayable",\
+    "type": "function"\
+  },\
+  {\
+    "constant": false,\
+    "inputs": [\
+      {\
+        "name": "id",\
+        "type": "bytes32"\
+      }\
+    ],\
+    "name": "getTicketPrice",\
     "outputs": [\
       {\
         "name": "",\
@@ -294,6 +480,10 @@ web3.eth.getAccounts(function(error, accounts) {
       {\
         "name": "sendFrom",\
         "type": "address"\
+      },\
+      {\
+        "name": "rnd2",\
+        "type": "bytes32"\
       }\
     ],\
     "name": "buy",\
@@ -387,8 +577,8 @@ var abiUsers = '[\
     }\
   ]';
 
-ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0xb085d68e19c25f512e4d35ba8989a81d43da49ea');
-ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0xbe4e200c4b76f64ca5ca47089bd54862266578a1');
+ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at('0x86583611200c1182b324d22df12eddbd63707456');
+ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at('0xe78780923e8d8b3bd53036520982967823cde23c');
 
 //console.log(ContractTickets);
 

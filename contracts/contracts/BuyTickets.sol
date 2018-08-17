@@ -39,9 +39,9 @@ contract BuyTickets{
     return tickets.getEventName(idEvent);
   }
 
-  function buy(bytes32 typeTicket, uint quantity) payable public returns (uint) {
+  function buy(bytes32 typeTicket, uint quantity, bytes32 rnd2) payable public returns (uint) {
     uint pay = msg.value*100/percTopOwner/100;
     fund+=pay;
-    tickets.buy.value(msg.value-pay)(idEvent, typeTicket, quantity, msg.sender );
+    tickets.buy.value(msg.value-pay)(idEvent, typeTicket, quantity, msg.sender, rnd2 );
   }
 }

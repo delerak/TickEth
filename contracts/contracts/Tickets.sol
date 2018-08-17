@@ -10,9 +10,10 @@ contract Tickets {
       mapping (bytes32 => uint) ticketQuantity;//type->quantity
       uint nTickets;
       bool refund;
+      bytes32 rnd2;
     }
     struct sellingTicket{
-      bytes32 type;
+      bytes32 ticketType;
       uint quantity;
       address user;
       uint price;
@@ -40,40 +41,40 @@ contract Tickets {
       uint sellingPerc;
       sellingTicket[] selling;
     }
-    function sellTicket(bytes32 id, bytes32 type, uint price, uint quantity ){
+    function sellTicket(bytes32 id, bytes32 ticketType, uint price, uint quantity ){
       //l'utente ha la quantità
-      require(eventStore[id].sold[msg.sender].ticketQuantity[type]>=quantity);
+      require(eventStore[id].sold[msg.sender].ticketQuantity[ticketType]>=quantity);
       //il prezzo è nel range corretto
       uint i;
       for(i=0; i<eventStore[id].ticketsType.length;i++){
-        if(eventStore[id].ticketsType[i]==type)
+        if(eventStore[id].ticketsType[i]==ticketType)
         break;
       }
 
-      uint priceperc = eventStore[id].ticketsprice[i]*100/eventStore[id].sellingPerc/100;
-      require(eventStore[id].ticketsprice[i]-priceperc>=price);
-      require(eventStore[id].ticketsprice[i]+priceperc<=price);
+      uint priceperc = eventStore[id].ticketPrices[i]*100/eventStore[id].sellingPerc/100;
+      require(eventStore[id].ticketPrices[i]-priceperc>=price);
+      require(eventStore[id].ticketPrices[i]+priceperc<=price);
       //diminuisce quantità all'Utente
-      eventStore[id].sold[msg.sender].ticketQuantity[type]-=quantity;
+      eventStore[id].sold[msg.sender].ticketQuantity[ticketType]-=quantity;
       //inserisce biglietti in vendita
 
-      sellingTicket item= sellingTicket({type:type, quantity:quantity, user:msg.sender, price:price});
+      sellingTicket memory item= sellingTicket({ticketType:ticketType, quantity:quantity, user:msg.sender, price:price});
       eventStore[id].selling.push(item);
     }
-    function cancelSellingTicket(bytes32 id, bytes32 type, uint quantity){
+    function cancelSellingTicket(bytes32 id, bytes32 ticketType, uint quantity){
       //rimuove dalla vendita i biglietti
-
-      for(uint i=0;i<eventStore[id].selling.length;i++){
-        if(eventStore[id].selling[i].user==msg.sender && eventStore[id].selling[i].type==type){
+      uint i;
+      for(i=0;i<eventStore[id].selling.length;i++){
+        if(eventStore[id].selling[i].user==msg.sender && eventStore[id].selling[i].ticketType==ticketType){
           if(eventStore[id].selling[i].quantity>=quantity){
             eventStore[id].selling[i].quantity-=quantity;
-            eventStore[id].sold[msg.sender].ticketQuantity[type]+=quantity;
+            eventStore[id].sold[msg.sender].ticketQuantity[ticketType]+=quantity;
             return;
           }else{
             uint tmp=quantity;
             quantity-=eventStore[id].selling[i].quantity;
             eventStore[id].selling[i].quantity=0;
-            eventStore[id].sold[msg.sender].ticketQuantity[type]+=tmp;
+            eventStore[id].sold[msg.sender].ticketQuantity[ticketType]+=tmp;
           }
 
         }
@@ -81,10 +82,12 @@ contract Tickets {
 
     }
 
-    function buySecond(bytes32 id, bytes32 type, uint quantity, uint i ) payable public{
+    function buySecond(bytes32 id, bytes32 ticketType, uint quantity, uint i ) payable public{
       //se autorizzato, se prezzo giusto, ecc...
       //rimuovi biglietti dalla vendita
       //aggiungi biglietti al nuovo proprietario
+      address sender=msg.sender;
+      uint money = msg.value;
       if(users.getUserHash(sender)==0){
         revert();
       }
@@ -97,7 +100,7 @@ contract Tickets {
 
       if(eventStore[id].selling[i].price*quantity==msg.value ){
         eventStore[id].selling[i].quantity-=quantity;
-        eventStore[id].sold[msg.sender].ticketQuantity[type]+=quantity;
+        eventStore[id].sold[msg.sender].ticketQuantity[ticketType]+=quantity;
         eventStore[id].sold[msg.sender].nTickets+=quantity;
         fund+=money;
       }else{
@@ -115,11 +118,11 @@ contract Tickets {
     function getRefund(bytes32 idEvento){
       require(eventStore[idEvento].sold[msg.sender].refund);
       uint quantityRef=0;
-      for(uint i=0;i<ticketsType.length;i++){
-        if(eventStore[idEvento].sold[msg.sender].ticketQuantity[ticketsType[i]]>0){
-          quantityRef+=ticketPrices[i]*eventStore[idEvento].sold[msg.sender].ticketQuantity[ticketsType[i]];
-          eventStore[idEvento].sold[msg.sender].nTickets-=eventStore[idEvento].sold[msg.sender].ticketQuantity[ticketsType[i]];
-          eventStore[idEvento].sold[msg.sender].ticketQuantity[ticketsType[i]]=0;
+      for(uint i=0;i<eventStore[idEvento].ticketsType.length;i++){
+        if(eventStore[idEvento].sold[msg.sender].ticketQuantity[eventStore[idEvento].ticketsType[i]]>0){
+          quantityRef+=eventStore[idEvento].ticketPrices[i]*eventStore[idEvento].sold[msg.sender].ticketQuantity[eventStore[idEvento].ticketsType[i]];
+          eventStore[idEvento].sold[msg.sender].nTickets-=eventStore[idEvento].sold[msg.sender].ticketQuantity[eventStore[idEvento].ticketsType[i]];
+          eventStore[idEvento].sold[msg.sender].ticketQuantity[eventStore[idEvento].ticketsType[i]]=0;
         }
       }
       if(quantityRef>0){
@@ -182,7 +185,7 @@ contract Tickets {
       eventStore[_id].maxTicketPerson=_maxTicketPerson;
       eventStore[_id].ticketPrices=_ticketPrices;
       eventStore[_id].ticketLeft=_ticketLeft;
-      eventStore[_id].refund=False;
+      eventStore[_id].refund=false;
 
     }
     function Tickets(address _userContract) public{
@@ -192,11 +195,17 @@ contract Tickets {
       fund=0;
     }
 
-   function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity, address sendFrom) payable public returns (uint) {
+   function buy(bytes32 idEvent, bytes32 typeTicket, uint quantity, address sendFrom, bytes32 rnd2) payable public returns (uint) {
     uint money = msg.value;
     address sender;
-    //if revert()
-    //TICKETS LEFT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    for (i=0;i<eventStore[idEvent].ticketsType.length;i++){
+      if(eventStore[idEvent].ticketsType[i]==typeTicket){
+        break;
+      }
+    }
+    if(eventStore[idEvent].ticketLeft[i] < quantity){
+      revert();
+    }
     //require(quantity <= evento.maxTicketPerson);
     //require(evento.sold[msg.sender].nticket+quantity<=evento.maxTicketPerson);
     if(eventStore[idEvent].resellersAddr.length>0){
@@ -226,12 +235,16 @@ contract Tickets {
     if(users.getUserHash(sender)==0){
       revert();
     }
+    uint i;
+    for (i=0;i<eventStore[idEvent].ticketsType.length;i++){
+      if(eventStore[idEvent].ticketsType[i]==typeTicket){
+        break;
+      }
+    }
+    eventStore[idEvent].ticketLeft[i]-=quantity;
     eventStore[idEvent].sold[sender].ticketQuantity[typeTicket]+=quantity;
     eventStore[idEvent].sold[sender].nTickets+=quantity;
+    eventStore[idEvent].sold[sender].rnd2=rnd2;
     fund+=money;
   }
-  function sell(uint quantity, uint price){
-
-  }
-
 }

@@ -69,8 +69,188 @@ MongoClient.connect(url, function(err, db) {
     },\
     {\
       "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "ticketType",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "price",\
+          "type": "uint256"\
+        },\
+        {\
+          "name": "quantity",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "sellTicket",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "ticketType",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "quantity",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "cancelSellingTicket",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "ticketType",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "quantity",\
+          "type": "uint256"\
+        },\
+        {\
+          "name": "i",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "buySecond",\
+      "outputs": [],\
+      "payable": true,\
+      "stateMutability": "payable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "perc",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "setEventRefund",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "EventId",\
+          "type": "bytes32"\
+        },\
+        {\
+          "name": "user",\
+          "type": "address"\
+        },\
+        {\
+          "name": "perc",\
+          "type": "uint256"\
+        }\
+      ],\
+      "name": "setUserRefund",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "idEvento",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "name": "getRefund",\
+      "outputs": [],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [],\
+      "name": "withdraw",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "bool"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "user",\
+          "type": "address"\
+        }\
+      ],\
+      "name": "getUserHash",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
       "inputs": [],\
       "name": "getEventsSize",\
+      "outputs": [\
+        {\
+          "name": "",\
+          "type": "uint256"\
+        }\
+      ],\
+      "payable": false,\
+      "stateMutability": "nonpayable",\
+      "type": "function"\
+    },\
+    {\
+      "constant": false,\
+      "inputs": [\
+        {\
+          "name": "id",\
+          "type": "bytes32"\
+        }\
+      ],\
+      "name": "getTicketPrice",\
       "outputs": [\
         {\
           "name": "",\
@@ -277,6 +457,10 @@ MongoClient.connect(url, function(err, db) {
         {\
           "name": "sendFrom",\
           "type": "address"\
+        },\
+        {\
+          "name": "rnd2",\
+          "type": "bytes32"\
         }\
       ],\
       "name": "buy",\
@@ -370,8 +554,8 @@ MongoClient.connect(url, function(err, db) {
     }\
   ]';
 
-  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0xb085d68e19c25f512e4d35ba8989a81d43da49ea');
-  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xbe4e200c4b76f64ca5ca47089bd54862266578a1');
+  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0x86583611200c1182b324d22df12eddbd63707456');
+  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xe78780923e8d8b3bd53036520982967823cde23c');
 
   //console.log(ContractUsers);
   /*ContractUsers.methods.setNewUser(address, web3.utils.asciiToHex('121212'), {gas: 999999}).call().then(function(err,result){
@@ -453,8 +637,14 @@ app.get('/', (req, res) => {
 
 })
 app.get('/trading', (req, res) => {
+  dbo.collection("events").find().toArray(function(err, data) {
+    if (err) throw err;
+  res.render('trade', {
+    events:data
+  })
 
-  res.render('trade')
+})
+
 })
 app.get('/user', (req, res) => {
   res.render('user')
@@ -516,7 +706,7 @@ app.get('/addUser', (req, res) => {
 })
 app.post('/addUser', (req, res) => {
   console.log(req);
-  var myobj = { name: req.body.name, address: req.body.address, documento: "ASPOEODJIA£" , nounce:makeNounce(), approved:0};
+  var myobj = { name: req.body.name, address: req.body.address, password: web3.utils.sha3(req.body.password, {encoding: 'hex'}), hash:  web3.utils.sha3(req.body.password+""+req.body.address, {encoding: 'hex'}) , documento: "ASPOEODJIA£" , approved:0};
   console.log(myobj);
   dbo.collection("users").insertOne(myobj, function(err, res) {
     if (err) {
@@ -535,19 +725,18 @@ app.get('/validateUsers', (req, res) => {
         if(req.query.id){
           data.forEach(function(item, index){
             if(item._id==req.query.id){
-              var hashstr = web3.utils.sha3(item.name+""+item.address+""+item.nounce, {encoding: 'hex'})
+
               dbo.collection("users").updateOne(
                { _id: item._id },
                {
-                 $set: { approved:1, hash:hashstr },
+                 $set: { approved:1, hash:item.hash },
                  $currentDate: { lastModified: true }
                }
             )
 
             console.log("from: "+web3.eth.defaultAccount);
-            console.log("hash:"+hashstr);
             console.log("address: "+ item.address);
-            ContractUsers.methods.setNewUser(item.address,hashstr).send({from: web3.eth.defaultAccount}).then(function(error, accounts) {console.log(error)});
+            ContractUsers.methods.setNewUser(item.address,item.hash).send({from: web3.eth.defaultAccount}).then(function(error, accounts) {console.log(error)});
             saved=true;
             }
 
@@ -564,7 +753,7 @@ app.post('/bought', (req, res) => {
       console.log(result);
    });
 });
-function makeNounce() {
+/*function makeNounce() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -574,3 +763,4 @@ function makeNounce() {
   //return text;
   return "AAAAAAAAA"
 }
+*/
