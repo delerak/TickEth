@@ -14,16 +14,13 @@ contract Events {
       mapping(bytes32 => bytes32[]) ticketsID; //type->t[]
       bytes32[] t;
     }
-    /*struct sellingTicket{
-      bytes32 ticketType;
-      uint quantity;
+    struct sellingTicket{
+      bytes32[] ticketType;
+      uint[] quantity;
       address user;
-      uint price;
-    }
-    struct seller{
-      uint percReturn;
-      uint nTickets;
-    }*/
+      uint[] prices;
+      bytes32[] t;
+  }
     struct eventObject{
       bytes32 id;
       bytes32 name;
@@ -37,11 +34,16 @@ contract Events {
       mapping (address => buyer) sold;
       mapping (bytes32 => uint) ticketPricesMap;
       mapping (bytes32 => uint) ticketLeftMap;
-      bool refund;
-      uint[] refundQuantity;
+      //bool refund;
+      //uint[] refundQuantity;
       //user sell their tickets
       //uint sellingPerc;
       //sellingTicket[] selling;
+      mapping (bytes32 => secondMarketLimit) secMarketLimit;
+    }
+    struct secondMarketLimit{
+        uint lowerLimit;
+        uint upperLimit;
     }
     function Events(address _userContract) public{
       ValidatedAddressesContract=_userContract;
@@ -181,11 +183,13 @@ contract Events {
     function getResellerTicketsAv(bytes32 id) public returns (uint){
       return eventStore[id].resellers[msg.sender].nTickets;
     }*/
-    function addEvent(bytes32 _id, bytes32 _name, bytes32[] _ticketsType, uint _maxTicketPerson, uint[] _ticketsPrices, uint[] _ticketsLeft, uint256 _startTimeStamp, uint256 _endTimeStamp) public
+    function addEvent(bytes32 _id, bytes32 _name, bytes32[] _ticketsType, uint _maxTicketPerson, uint[] _ticketsPrices, uint[] _ticketsLeft, uint256 _startTimeStamp, uint256 _endTimeStamp, uint[] _lowSecMarket, uint[] _upSecMarket) public
     {
         require(msg.sender==owner);
         require(_ticketsType.length==_ticketsPrices.length);
         require(_ticketsPrices.length==_ticketsLeft.length);
+        require(_lowSecMarket.length==_ticketsType.length);
+        require(_upSecMarket.length==_ticketsType.length);
         uint i=0;
         for (i=0;i<events.length;i++){
             require(events[i]!=_id);
@@ -201,10 +205,11 @@ contract Events {
         eventStore[_id].refund=false;
         for (i=0;i<_ticketsType.length;i++){
             eventStore[_id].ticketPricesMap[_ticketsType[i]]=_ticketsPrices[i];
-        }
-        for (i=0;i<_ticketsType.length;i++){
             eventStore[_id].ticketLeftMap[_ticketsType[i]]=_ticketsLeft[i];
+            eventStore[_id].secMarketLimit[_ticketsType[i]].lowerLimit=_lowSecMarket[i];
+            eventStore[_id].secMarketLimit[_ticketsType[i]].upperLimit=_upSecMarket[i];
         }
+
     }
 
    function buy(bytes32 _idEvent, bytes32 _ticketsType, uint _quantity, address _sendFrom, bytes32[] _t) payable public returns (uint) {
@@ -218,6 +223,7 @@ contract Events {
         if(_t.length>_quantity){
             revert();
         }
+
         /*if(eventStore[_idEvent].resellersAddr.length>0){
           if(eventStore[_idEvent].resellers[msg.sender].nTickets<_quantity || _quantity==0){
             revert();
@@ -225,8 +231,9 @@ contract Events {
         //sender=sendFrom;
         //eventStore[idEvent].resellers[msg.sender].nTickets-=quantity;//va spostato in caso una require vada male
         //}else{
-          require (block.timestamp > eventStore[_idEvent].startTimeStamp);
-          require (block.timestamp < eventStore[_idEvent].endTimeStamp);
+          if(block.timestamp < eventStore[_idEvent].startTimeStamp && block.timestamp > eventStore[_idEvent].endTimeStamp){
+            revert();
+          }
           if(eventStore[_idEvent].ticketPricesMap[_ticketsType]*_quantity > money || _quantity==0){
             revert();
           }
@@ -244,10 +251,14 @@ contract Events {
         eventStore[_idEvent].ticketLeftMap[_ticketsType]-=_quantity;
         eventStore[_idEvent].sold[sender].ticketsQuantity[_ticketsType]+=_quantity;
         eventStore[_idEvent].sold[sender].nTickets+=_quantity;
-        //eventStore[_idEvent].sold[sender].t=_t;
+
         for (i=0;i<_quantity;i++){
-            eventStore[_idEvent].sold[sender].ticketsID[_ticketsType].push()
+            if(eventStore[_idEvent].sold[sender].ticketsID[_ticketsType].length==0){
+                eventStore[_idEvent].sold[sender].t.push(_t[i]);
+            }
+            eventStore[_idEvent].sold[sender].ticketsID[_ticketsType].push(_t[i]);
         }
+
         fund+=money;
   }
 }
