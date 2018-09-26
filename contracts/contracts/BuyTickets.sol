@@ -1,5 +1,5 @@
 pragma solidity ^0.4.19;
-import "./Tickets.sol";
+/*import "./Events.sol";
 contract BuyTickets{
   address ticketsContract;
   address topOwner;
@@ -44,4 +44,4 @@ contract BuyTickets{
     fund+=pay;
     tickets.buy.value(msg.value-pay)(idEvent, typeTicket, quantity, msg.sender, rnd2 );
   }
-}
+}*/
