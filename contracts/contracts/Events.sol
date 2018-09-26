@@ -7,6 +7,7 @@ contract Events {
     uint fund;
     mapping(bytes32 => eventObject) eventStore;
     ValidatedAddresses users;
+
     struct buyer{
       mapping (bytes32 => uint) ticketsQuantity;//type->quantity
       uint nTickets;
@@ -14,13 +15,15 @@ contract Events {
       mapping(bytes32 => bytes32[]) ticketsID; //type->t[]
       bytes32[] t;
     }
-    struct sellingTicket{
-      bytes32[] ticketType;
-      uint[] quantity;
-      address user;
-      uint[] prices;
-      bytes32[] t;
-  }
+    struct buyerSecMarket{
+        address seller;
+        uint prices[];
+        mapping (bytes32 => uint) ticketsQuantity;//type->quantity
+        uint nTickets;
+        bool refund;
+        mapping(bytes32 => bytes32[]) ticketsID; //type->t[]
+        bytes32[] t;
+    }
     struct eventObject{
       bytes32 id;
       bytes32 name;
@@ -40,11 +43,19 @@ contract Events {
       //uint sellingPerc;
       //sellingTicket[] selling;
       mapping (bytes32 => secondMarketLimit) secMarketLimit;
+      sellingTicket[] secondMarket;
     }
     struct secondMarketLimit{
         uint lowerLimit;
         uint upperLimit;
     }
+    struct sellingTicket{
+      bytes32[] ticketType;
+      uint[] quantity;
+      address user;
+      uint[] prices;
+      bytes32[] t;
+  }
     function Events(address _userContract) public{
       ValidatedAddressesContract=_userContract;
       users=ValidatedAddresses(ValidatedAddressesContract);
