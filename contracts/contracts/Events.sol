@@ -53,47 +53,39 @@ contract Events {
       fund=0;
     }
 
-    /*function sellTicket(bytes32 id, bytes32 ticketType, uint price, uint quantity ){
-      //l'utente ha la quantità
-      require(eventStore[id].sold[msg.sender].ticketsQuantity[ticketType]>=quantity);
-      //il prezzo è nel range corretto
-      uint i;
-      for(i=0; i<eventStore[id].ticketsType.length;i++){
-        if(eventStore[id].ticketsType[i]==ticketType)
-        break;
-      }
 
-      uint priceperc = eventStore[id].ticketPrices[i]*100/eventStore[id].sellingPerc/100;
-      require(eventStore[id].ticketPrices[i]-priceperc>=price);
-      require(eventStore[id].ticketPrices[i]+priceperc<=price);
-      //diminuisce quantità all'Utente
-      eventStore[id].sold[msg.sender].ticketsQuantity[ticketType]-=quantity;
-      //inserisce biglietti in vendita
-
-      sellingTicket memory item= sellingTicket({ticketType:ticketType, quantity:quantity, user:msg.sender, price:price});
-      eventStore[id].selling.push(item);
-    }
-    function cancelSellingTicket(bytes32 id, bytes32 ticketType, uint quantity){
-      //rimuove dalla vendita i biglietti
-      uint i;
-      for(i=0;i<eventStore[id].selling.length;i++){
-        if(eventStore[id].selling[i].user==msg.sender && eventStore[id].selling[i].ticketType==ticketType){
-          if(eventStore[id].selling[i].quantity>=quantity){
-            eventStore[id].selling[i].quantity-=quantity;
-            eventStore[id].sold[msg.sender].ticketsQuantity[ticketType]+=quantity;
-            return;
-          }else{
-            uint tmp=quantity;
-            quantity-=eventStore[id].selling[i].quantity;
-            eventStore[id].selling[i].quantity=0;
-            eventStore[id].sold[msg.sender].ticketsQuantity[ticketType]+=tmp;
+    function cancelSellingTicket(bytes32 _id, bytes32 _ticketsType, uint _quantity, bytes32[] _t){
+        uint cont=0;
+        uint pos[];
+        for(uint i=0; i<eventObject[_id].secondMarket.length;i++){
+          if(eventObject[_id].secondMarket[i].seller==msg.sender){
+              if(eventObject[_id].ticketsQuantity[_ticketsType]>0){
+                  cont+=eventObject[_id].ticketsQuantity[_ticketsType];
+                  pos.push(i);
+                  if(cont>_quantity){
+                      for(uint k=0;k<pos.length;k++){
+                          if(eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType]<=cont){
+                              cont-=eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType];
+                              eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType]=0;
+                          }else{
+                              eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType]-=cont;
+                          }
+                      }
+                      break;
+                  }
+              }
           }
-
         }
-      }
-
+        eventStore[_idEvent].sold[msg.sender].ticketsQuantity[_ticketsType]+=_quantity;
+        eventStore[_idEvent].sold[msg.sender].nTickets+=_quantity;
+        for (i=0;i<_quantity;i++){
+            if(eventStore[_idEvent].sold[msg.sender].ticketsID[_ticketsType][_t[i]]==0){
+                eventStore[_idEvent].sold[msg.sender].t[_ticketsType].push(_t[i]);
+            }
+            eventStore[_idEvent].sold[sender].ticketsID[_ticketsType][_t[i]]++;
+        }
     }
-
+    /*
     function buySecond(bytes32 id, bytes32 ticketType, uint quantity, uint i ) payable public{
       //se autorizzato, se prezzo giusto, ecc...
       //rimuovi biglietti dalla vendita
