@@ -9,16 +9,17 @@ contract Events {
     ValidatedAddresses users;
 
     struct buyer{
-      mapping (bytes32 => uint[]) ticketsQuantity;//type->quantity
+      mapping (bytes32 => uint) ticketsQuantity;//type->quantity
       uint nTickets;
       bool refund;
       mapping (bytes32 => bytes32[]) t;
       mapping (bytes32 => mapping (bytes32 => uint) ) ticketsID;
     }
-    struct buyerSecMarket{
+    struct sellerSecMarket{
         address seller;
         mapping(bytes32 => uint) prices;//type->price
         mapping (bytes32 => uint) ticketsQuantity;//type->quantity
+        uint nTickets;
     }
     struct eventObject{
       bytes32 id;
@@ -28,18 +29,18 @@ contract Events {
       bytes32[] ticketsType;
       uint maxTicketPerson;
       uint[] ticketPrices;
-      //mapping (address => seller) resellers;
-      //address[] resellersAddr;
       mapping (address => buyer) sold;
       mapping (bytes32 => uint) ticketPricesMap;
       mapping (bytes32 => uint) ticketLeftMap;
+      //mapping (address => seller) resellers;
+      //address[] resellersAddr;
       //bool refund;
       //uint[] refundQuantity;
       //user sell their tickets
       //uint sellingPerc;
       //sellingTicket[] selling;
       mapping (bytes32 => secondMarketLimit) secMarketLimit;
-      buyerSecMarket[] secondMarket;
+      sellerSecMarket[] secondMarket;
     }
     struct secondMarketLimit{
         uint lowerLimit;
@@ -54,21 +55,21 @@ contract Events {
     }
 
 
-    function cancelSellingTicket(bytes32 _id, bytes32 _ticketsType, uint _quantity, bytes32[] _t){
+    function cancelSellingTicket(bytes32 _idEvent, bytes32 _ticketsType, uint _quantity, bytes32[] _t){
         uint cont=0;
-        uint pos[];
-        for(uint i=0; i<eventObject[_id].secondMarket.length;i++){
-          if(eventObject[_id].secondMarket[i].seller==msg.sender){
-              if(eventObject[_id].ticketsQuantity[_ticketsType]>0){
-                  cont+=eventObject[_id].ticketsQuantity[_ticketsType];
+        uint[] pos;
+        for(uint i=0; i<eventStore[_idEvent].secondMarket.length;i++){
+          if(eventStore[_idEvent].secondMarket[i].seller==msg.sender){
+              if(eventStore[_idEvent].secondMarket[i].ticketsQuantity[_ticketsType]>0){
+                  cont+=eventStore[_idEvent].secondMarket[i].ticketsQuantity[_ticketsType];
                   pos.push(i);
                   if(cont>_quantity){
                       for(uint k=0;k<pos.length;k++){
-                          if(eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType]<=cont){
-                              cont-=eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType];
-                              eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType]=0;
+                          if(eventStore[_idEvent].secondMarket[i].ticketsQuantity[_ticketsType]<=cont){
+                              cont-=eventStore[_idEvent].secondMarket[i].ticketsQuantity[_ticketsType];
+                              eventStore[_idEvent].secondMarket[i].ticketsQuantity[_ticketsType]=0;
                           }else{
-                              eventObject[_id].secondMarket[i].ticketsQuantity[_ticketsType]-=cont;
+                              eventStore[_idEvent].secondMarket[i].ticketsQuantity[_ticketsType]-=cont;
                           }
                       }
                       break;
@@ -82,37 +83,53 @@ contract Events {
             if(eventStore[_idEvent].sold[msg.sender].ticketsID[_ticketsType][_t[i]]==0){
                 eventStore[_idEvent].sold[msg.sender].t[_ticketsType].push(_t[i]);
             }
-            eventStore[_idEvent].sold[sender].ticketsID[_ticketsType][_t[i]]++;
+            eventStore[_idEvent].sold[msg.sender].ticketsID[_ticketsType][_t[i]]++;
         }
     }
-    /*
-    function buySecond(bytes32 id, bytes32 ticketType, uint quantity, uint i ) payable public{
-      //se autorizzato, se prezzo giusto, ecc...
-      //rimuovi biglietti dalla vendita
-      //aggiungi biglietti al nuovo proprietario
+
+    function buySecond(bytes32 _idEvent, bytes32 _ticketsType, uint _quantity, uint _i, bytes32[] _t ) payable public{
       address sender=msg.sender;
       uint money = msg.value;
-      if(users.getUserHash(sender)==0){
+      uint onSale=0;
+      uint i=0;
+      if(users.isUserValidated(sender)==false){
         revert();
       }
-      if(eventStore[id].maxTicketPerson<quantity){
+      if(eventStore[_idEvent].ticketPricesMap[_ticketsType]*_quantity > money || _quantity==0){
         revert();
       }
-      if(eventStore[id].selling[i].quantity<quantity){
+      for(i=0;i<eventStore[_idEvent].secondMarket.length;i++){
+          if(eventStore[_idEvent].secondMarket[i].seller==sender){
+              onSale+=eventStore[_idEvent].secondMarket[i].nTickets;
+          }
+      }
+      if(eventStore[_idEvent].sold[sender].nTickets+_quantity+onSale>eventStore[_idEvent].maxTicketPerson){
+          revert();
+      }
+      if(eventStore[_idEvent].secondMarket[_i].ticketsQuantity[_ticketsType]<_quantity){
         revert();
       }
+      if(_t.length>_quantity){
+          revert();
+      }
+      if(eventStore[_idEvent].secondMarket[_i].prices[_ticketsType]*_quantity==money ){
+        eventStore[_idEvent].secondMarket[_i].ticketsQuantity[_ticketsType]-=_quantity;
 
-      if(eventStore[id].selling[i].price*quantity==msg.value ){
-        eventStore[id].selling[i].quantity-=quantity;
-        eventStore[id].sold[msg.sender].ticketsQuantity[ticketType]+=quantity;
-        eventStore[id].sold[msg.sender].nTickets+=quantity;
-        fund+=money;
+        eventStore[_idEvent].sold[sender].ticketsQuantity[_ticketsType]+=_quantity;
+        eventStore[_idEvent].sold[sender].nTickets+=_quantity;
+        for (i=0;i<_quantity;i++){
+            if(eventStore[_idEvent].sold[sender].ticketsID[_ticketsType][_t[i]]==0){
+                eventStore[_idEvent].sold[sender].t[_ticketsType].push(_t[i]);
+            }
+            eventStore[_idEvent].sold[sender].ticketsID[_ticketsType][_t[i]]++;
+        }
+
+        eventStore[_idEvent].secondMarket[_i].seller.send(money);
       }else{
         revert();
       }
-
-
     }
+    /*
     function setEventRefund(bytes32 id, uint perc){
 
     }
@@ -176,26 +193,35 @@ contract Events {
     function getResellerTicketsAv(bytes32 id) public returns (uint){
       return eventStore[id].resellers[msg.sender].nTickets;
     }*/
-    function sellTickets(bytes32 _id, bytes32 _t[], uint[] _quantities, bytes32 _ticketsType, uint _ticketsPrice ) public{
-        require(eventStore[_id].secMarketLimit[_ticketsPrice].lowerLimit<=_ticketsPrice);
-        require(eventStore[_id].secMarketLimit[_ticketsPrice].upperLimit>=_ticketsPrice);
-        require(eventStore[_id].buyer[msg.sender].ticketsQuantity[_ticketsType]>=_t.length);
-        require(_t.length==quantity.length);
+
+    //add new object for every new sale
+    //TODO: change old sale instead
+    function sellTickets(bytes32 _id, bytes32[] _t, uint[] _quantity, bytes32 _ticketsType, uint _ticketsPrice ) public{
+        require(eventStore[_id].secMarketLimit[_ticketsType].lowerLimit<=_ticketsPrice);
+        require(eventStore[_id].secMarketLimit[_ticketsType].upperLimit>=_ticketsPrice);
+        require(eventStore[_id].sold[msg.sender].ticketsQuantity[_ticketsType]>=_t.length);
+        require(_t.length==_quantity.length);
         for(uint i =0; i<_t.length;i++){
-            if(eventStore[_id].buyer[msg.sender].ticketsID[_ticketsType][_t[i]]<_quantity[i]){
+            if(eventStore[_id].sold[msg.sender].ticketsID[_ticketsType][_t[i]]<_quantity[i]){
                 revert();
-            };
-            eventStore[_id].buyer[msg.sender].ticketsID[_ticketsType][_t[i]]-=_quantity[i];
+            }
+            eventStore[_id].sold[msg.sender].ticketsID[_ticketsType][_t[i]]-=_quantity[i];
         }
 
-        eventStore[_id].buyer[msg.sender].ticketsQuantity[_ticketsType]-=_t.length;
-        eventStore[_id].buyer[msg.sender].nTickets-=_t.length;
+        eventStore[_id].sold[msg.sender].ticketsQuantity[_ticketsType]-=_t.length;
+        eventStore[_id].sold[msg.sender].nTickets-=_t.length;
 
         //one price for every type of ticket on this sale
-        buyerSecMarket tmp=buyerSecMarket();
+        sellerSecMarket tmp;
         tmp.seller=msg.sender;
+
         tmp.prices[_ticketsType]=_ticketsPrice; //modify or set price
-        tmp.ticketsQuantity[_ticketsType]=_quantity;
+        uint sum=0;
+        for(i=0;i<_quantity.length;i++){
+            sum+=_quantity[i];
+        }
+        tmp.ticketsQuantity[_ticketsType]+=sum;
+        tmp.nTickets+=sum;
         eventStore[_id].secondMarket.push(tmp);
     }
     function addEvent(bytes32 _id, bytes32 _name, bytes32[] _ticketsType, uint _maxTicketPerson, uint[] _ticketsPrices, uint[] _ticketsLeft, uint256 _startTimeStamp, uint256 _endTimeStamp, uint[] _lowSecMarket, uint[] _upSecMarket) public
@@ -217,7 +243,7 @@ contract Events {
         eventStore[_id].ticketsType=_ticketsType;
         eventStore[_id].maxTicketPerson=_maxTicketPerson;
         eventStore[_id].ticketPrices=_ticketsPrices;
-        eventStore[_id].refund=false;
+        //eventStore[_id].refund=false;
         for (i=0;i<_ticketsType.length;i++){
             eventStore[_id].ticketPricesMap[_ticketsType[i]]=_ticketsPrices[i];
             eventStore[_id].ticketLeftMap[_ticketsType[i]]=_ticketsLeft[i];
@@ -231,7 +257,8 @@ contract Events {
         uint money = msg.value;
         address sender;
         uint i=0;
-
+        uint onSale=0;
+        buyer eventBuyer;
         if(eventStore[_idEvent].ticketLeftMap[_ticketsType] < _quantity){
             revert();
         }
@@ -253,9 +280,15 @@ contract Events {
             revert();
           }
           sender=msg.sender;
+          eventBuyer=eventStore[_idEvent].sold[sender];
+          for(i=0;i<eventStore[_idEvent].secondMarket.length;i++){
+              if(eventStore[_idEvent].secondMarket[i].seller==sender){
+                  onSale+=eventStore[_idEvent].secondMarket[i].nTickets;
+              }
+          }
         //}
 
-          if(eventStore[_idEvent].sold[sender].nTickets+_quantity>eventStore[_idEvent].maxTicketPerson){
+          if(eventBuyer.nTickets+_quantity+onSale>eventStore[_idEvent].maxTicketPerson){
               revert();
           }
 
@@ -264,14 +297,14 @@ contract Events {
         }
 
         eventStore[_idEvent].ticketLeftMap[_ticketsType]-=_quantity;
-        eventStore[_idEvent].sold[sender].ticketsQuantity[_ticketsType]+=_quantity;
-        eventStore[_idEvent].sold[sender].nTickets+=_quantity;
+        eventBuyer.ticketsQuantity[_ticketsType]+=_quantity;
+        eventBuyer.nTickets+=_quantity;
 
         for (i=0;i<_quantity;i++){
-            if(eventStore[_idEvent].sold[sender].ticketsID[_ticketsType][_t[i]]==0){
-                eventStore[_idEvent].sold[sender].t[_ticketsType].push(_t[i]);
+            if(eventBuyer.ticketsID[_ticketsType][_t[i]]==0){
+                eventBuyer.t[_ticketsType].push(_t[i]);
             }
-            eventStore[_idEvent].sold[sender].ticketsID[_ticketsType][_t[i]]++;
+            eventBuyer.ticketsID[_ticketsType][_t[i]]++;
         }
 
         fund+=money;
