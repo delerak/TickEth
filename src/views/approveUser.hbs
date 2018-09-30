@@ -1,19 +1,68 @@
+<script>
+console.log("start")
+var abiUsers;
+var ContractUsers;
+var ContractAddr='0x31bdbe87c7d1098e86b69a89cc653e20dffa6b5b';
+window.addEventListener('load', function () {
+  console.log("ok");
+if (typeof web3 !== 'undefined') {
+  console.log("siiii");
+  web3Provider = web3.currentProvider;
+} else {
+  console.log("ganache");
+  // If no injected web3 instance is detected, fall back to Ganache
+  web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
+}
+web3 = new Web3(web3Provider);
+web3.eth.getAccounts(function(error, accounts) {
+    web3.eth.defaultAccount = accounts[0];
+});
+$.getJSON("../ABI/ValidatedAddresses.json", function(json) {
+    abiUsers=JSON.stringify(json.abi); // this will show the info it in firebug console
+    ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at(ContractAddr);
+    console.log(ContractUsers)
+    });
+});
+
+function validate(challange){
+    console.log(challange);
+
+    ContractUsers.challange(challange, {from:web3.eth.defaultAccount, to:ContractAddr, gas: 6000000},function(error, result){
+       if(!error){
+           console.log(result);
+           $.ajax({
+				type: 'POST',
+				data: JSON.stringify({'addr':web3.eth.defaultAccount, 'challange':challange}),
+		        contentType: 'application/json',
+                  url: '/checkValidity',
+                  success: function(data) {
+                      console.log('success');
+                      console.log(JSON.stringify(data));
+                  }
+            });
+
+      }else
+           console.error(error);
+   });
+}
+</script>
 {{#if saved}}
 <div class="row" style="background-color:green;color:white;justify-content: center;">User approved</div>
 {{/if}}
 <br><br>
 <div class="row">
 {{#each data}}
-<div class="col-sm-3">
+<div class="col-sm-3" style="margin-left:10px;">
   <div class="card">
     <div class="card-body">
       <h5 class="card-title">{{this.name}}</h5>
       <p class="card-text">{{this.address}}</p>
+      <p class="card-text">Challange: {{this.hash}}</p>
 {{query}}
       {{#if query.id}}
-        <a href="/validateUsers?id={{this._id}}" class="btn disabled btn-primary">Validate</a>
+        <a href="/validateUsers?id={{this._id}}" class="btn disabled btn-primary">Validate Address</a>
       {{else}}
-        <a href="/validateUsers?id={{this._id}}" class="btn btn-primary">Validate</a>
+        <a onclick="validate('{{this.hash}}')" class="btn btn-primary">Validate Address</a>
       {{/if}}
 
     </div>

@@ -29,3 +29,5 @@ BuyTickets.new(sct.address, 0x04383a0240B1A991417f1995aC4d24840f4a8Ea9, 30, 10, 
 sctb.buy('zona A',1).then(function(res){console.log(res);})
 
 sctb.buy('zona A',1, {value:web3.toWei(1, 'ether')}).then(function(res){console.log(res);})
+
+ValidatedAddresses.new().then(function(res) { sc = ValidatedAddresses.at(res.address) })

@@ -655,7 +655,7 @@ app.post('/user', (req, res) => {
   var nounce = req.body.nounce;
   var idEven=req.body.idEvent;
   var hashstr = web3.utils.sha3(nam+""+ad+""+nounce, {encoding: 'hex'})
-  ContractTickets.methods.getEventTicketBought(idEven).call().then(function(result){
+  /*ContractTickets.methods.getEventTicketBought(idEven).call().then(function(result){
     console.log("Biglietti: "+result);
   });
   ContractUsers.methods.getUserHash(ad).call().then(function(result){
@@ -663,9 +663,7 @@ app.post('/user', (req, res) => {
       console.log("Utente verificato")
     }else{
       console.log("Utente non verificato")
-    }
-
-  });
+  }*/
 
   res.render('user')
 
@@ -706,7 +704,7 @@ app.get('/addUser', (req, res) => {
 })
 app.post('/addUser', (req, res) => {
   console.log(req);
-  var myobj = { name: req.body.name, address: req.body.address, password: web3.utils.sha3(req.body.password, {encoding: 'hex'}), hash:  web3.utils.sha3(req.body.password+""+req.body.address, {encoding: 'hex'}) , documento: "ASPOEODJIA£" , approved:0};
+  var myobj = { name: req.body.name, address: req.body.address, password: web3.utils.sha3(req.body.password, {encoding: 'hex'}), hash: makeNounce() , documento: "ASPOEODJIA£" , approved:0};
   console.log(myobj);
   dbo.collection("users").insertOne(myobj, function(err, res) {
     if (err) {
@@ -736,7 +734,7 @@ app.get('/validateUsers', (req, res) => {
 
             console.log("from: "+web3.eth.defaultAccount);
             console.log("address: "+ item.address);
-            ContractUsers.methods.setNewUser(item.address,item.hash).send({from: web3.eth.defaultAccount}).then(function(error, accounts) {console.log(error)});
+            ContractUsers.methods.setNewUser(item.address).send({from: web3.eth.defaultAccount}).then(function(error, accounts) {console.log(error)});
             saved=true;
             }
 
@@ -753,14 +751,16 @@ app.post('/bought', (req, res) => {
       console.log(result);
    });
 });
-/*function makeNounce() {
+app.post('/checkValidity', (req, res) => {
+  console.log(req.data);
+});
+function makeNounce() {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   for (var i = 0; i < 9; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-  //return text;
-  return "AAAAAAAAA"
+  return text;
+
 }
-*/
