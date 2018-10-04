@@ -2,7 +2,7 @@
 console.log("start")
 var abiUsers;
 var ContractUsers;
-var ContractAddr='0x31bdbe87c7d1098e86b69a89cc653e20dffa6b5b';
+var ContractAddr='0xada79a6a421750feaae356e6fadc35a217441124';
 window.addEventListener('load', function () {
   console.log("ok");
 if (typeof web3 !== 'undefined') {
@@ -24,31 +24,42 @@ $.getJSON("../ABI/ValidatedAddresses.json", function(json) {
     });
 });
 
-function validate(challange){
-    console.log(challange);
-
-    ContractUsers.challange(challange, {from:web3.eth.defaultAccount, to:ContractAddr, gas: 6000000},function(error, result){
+function validate(challenge,addr,id){
+    console.log(addr);
+    ContractUsers.challange(challenge, {from:web3.eth.defaultAccount, to:ContractAddr, gas: 6000000},function(error, result){
        if(!error){
-           console.log(result);
-           $.ajax({
-				type: 'POST',
-				data: JSON.stringify({'addr':web3.eth.defaultAccount, 'challange':challange}),
-		        contentType: 'application/json',
-                  url: '/checkValidity',
-                  success: function(data) {
-                      console.log('success');
-                      console.log(JSON.stringify(data));
-                  }
-            });
+         //in a real case this have to be delayed and "async"
+        $.ajax({
+          type: 'post',
+          url: '/checkValidity',
+          data: {'challenge':challenge, 'address':addr},
+          xhrFields: {
+              withCredentials: false
+          },
+          headers: {
 
+          },
+          success: function (data) {
+              console.log('Success');
+              console.log(data);
+              if(data=="valid"){
+                $('#validated').css('visibility', 'visible');
+                $('#'+id).addClass('disabled');
+              }
+          },
+          error: function () {
+              console.log('We are sorry but our servers are having an issue right now');
+          }
+        })
       }else
-           console.error(error);
-   });
+        console.error(error);
+      });
+
 }
 </script>
-{{#if saved}}
-<div class="row" style="background-color:green;color:white;justify-content: center;">User approved</div>
-{{/if}}
+
+<div id="validated" class="row" style="visibility:hidden;background-color:green;color:white;justify-content: center;">User validated</div>
+
 <br><br>
 <div class="row">
 {{#each data}}
@@ -57,12 +68,12 @@ function validate(challange){
     <div class="card-body">
       <h5 class="card-title">{{this.name}}</h5>
       <p class="card-text">{{this.address}}</p>
-      <p class="card-text">Challange: {{this.hash}}</p>
+      <p class="card-text">Challenge: {{this.hash}}</p>
 {{query}}
       {{#if query.id}}
         <a href="/validateUsers?id={{this._id}}" class="btn disabled btn-primary">Validate Address</a>
       {{else}}
-        <a onclick="validate('{{this.hash}}')" class="btn btn-primary">Validate Address</a>
+        <a id="{{this._id}}" onclick="validate('{{this.hash}}', '{{this.address}}','{{this._id}}')" class="btn btn-primary">Validate Address</a>
       {{/if}}
 
     </div>

@@ -2,15 +2,12 @@ truffle console
 compile
 migrate
 
-Users.new().then(function(res) { sc = Users.at(res.address) })
+ValidatedAddresses.new().then(function(res) { sc = ValidatedAddresses.at(res.address) })
 
 sc.address
 
-Tickets.new(sc.address).then(function(res) { sct = Tickets.at(res.address) })
-
+Events.new(sc.address).then(function(res) { sct = Events.at(res.address) })
 sct.address
-
-sc.getUserHash.call('0xd49186534cac094b040306f316aa11e20cd51e58').then(function(res){console.log(res);})
 
 sc.setNewUser('123','1234').then(function(res){console.log(res);})
 
@@ -30,4 +27,14 @@ sctb.buy('zona A',1).then(function(res){console.log(res);})
 
 sctb.buy('zona A',1, {value:web3.toWei(1, 'ether')}).then(function(res){console.log(res);})
 
-ValidatedAddresses.new().then(function(res) { sc = ValidatedAddresses.at(res.address) })
+
+Private Keys
+==================
+(0) 672e83bc5432e91e879fcca0774005c36328452e01b984c860bc8448f3e7d7d0
+
+enable history loop fruit palm buzz dog poet custom manage begin balcony
+
+
+Available Accounts
+==================
+(0) 0xc12670d8a43cb5974a44494c626f5872dd59f8a8

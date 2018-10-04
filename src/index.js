@@ -1,4 +1,6 @@
 // index.js
+var ticketAddr='0xafd62a85038a89e3d8c0e4243fe42945f0d88011';
+var userAddr='0xada79a6a421750feaae356e6fadc35a217441124';
 const path = require('path')
 const express = require('express')
 const exphbs = require('express-handlebars')
@@ -13,8 +15,6 @@ var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017/ticksell";
 var dbo;
 var ContractUsers;
-const address='0xd49186534cac094b040306f316aa11e20cd51e58';
-
 MongoClient.connect(url, function(err, db) {
   if (err) throw err;
   dbo = db.db("ticksell");
@@ -40,531 +40,14 @@ MongoClient.connect(url, function(err, db) {
 
     });
 
-
-    var abiTickets= '[\
-    {\
-      "constant": true,\
-      "inputs": [],\
-      "name": "owner",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "address"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "view",\
-      "type": "function"\
-    },\
-    {\
-      "inputs": [\
-        {\
-          "name": "_userContract",\
-          "type": "address"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "constructor"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "ticketType",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "price",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "quantity",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "sellTicket",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "ticketType",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "quantity",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "cancelSellingTicket",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "ticketType",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "quantity",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "i",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "buySecond",\
-      "outputs": [],\
-      "payable": true,\
-      "stateMutability": "payable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "perc",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "setEventRefund",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "EventId",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "user",\
-          "type": "address"\
-        },\
-        {\
-          "name": "perc",\
-          "type": "uint256"\
-        }\
-      ],\
-      "name": "setUserRefund",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "idEvento",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "getRefund",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [],\
-      "name": "withdraw",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "bool"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "user",\
-          "type": "address"\
-        }\
-      ],\
-      "name": "getUserHash",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [],\
-      "name": "getEventsSize",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "getTicketPrice",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "getEventName",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "getEventTicketPerPerson",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "addr",\
-          "type": "address"\
-        }\
-      ],\
-      "name": "getEventTicketBought",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "addr",\
-          "type": "address"\
-        },\
-        {\
-          "name": "perc",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "ntickets",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "addReseller",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "getResellerLength",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "getResellerfirstAddr",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "address"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "id",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "getResellerTicketsAv",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "_id",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "_name",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "_ticketsType",\
-          "type": "bytes32[]"\
-        },\
-        {\
-          "name": "_maxTicketPerson",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "_ticketPrices",\
-          "type": "uint256[]"\
-        },\
-        {\
-          "name": "_ticketLeft",\
-          "type": "uint256[]"\
-        }\
-      ],\
-      "name": "addEvent",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "idEvent",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "typeTicket",\
-          "type": "bytes32"\
-        },\
-        {\
-          "name": "quantity",\
-          "type": "uint256"\
-        },\
-        {\
-          "name": "sendFrom",\
-          "type": "address"\
-        },\
-        {\
-          "name": "rnd2",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "buy",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "uint256"\
-        }\
-      ],\
-      "payable": true,\
-      "stateMutability": "payable",\
-      "type": "function"\
-    }\
-  ]';
-    var abiUsers = '[\
-    {\
-      "constant": true,\
-      "inputs": [\
-        {\
-          "name": "",\
-          "type": "address"\
-        }\
-      ],\
-      "name": "UserHash",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "view",\
-      "type": "function"\
-    },\
-    {\
-      "constant": true,\
-      "inputs": [],\
-      "name": "owner",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "address"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "view",\
-      "type": "function"\
-    },\
-    {\
-      "inputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "constructor"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "_account",\
-          "type": "address"\
-        }\
-      ],\
-      "name": "getUserHash",\
-      "outputs": [\
-        {\
-          "name": "",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    },\
-    {\
-      "constant": false,\
-      "inputs": [\
-        {\
-          "name": "who",\
-          "type": "address"\
-        },\
-        {\
-          "name": "hash",\
-          "type": "bytes32"\
-        }\
-      ],\
-      "name": "setNewUser",\
-      "outputs": [],\
-      "payable": false,\
-      "stateMutability": "nonpayable",\
-      "type": "function"\
-    }\
-  ]';
-
-  ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), '0x86583611200c1182b324d22df12eddbd63707456');
-  ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), '0xe78780923e8d8b3bd53036520982967823cde23c');
-
-  //console.log(ContractUsers);
-  /*ContractUsers.methods.setNewUser(address, web3.utils.asciiToHex('121212'), {gas: 999999}).call().then(function(err,result){
-    console.log(err);
-  });*/
-
-
-
-
+    var fs = require('fs');
+    var obj = JSON.parse(fs.readFileSync('src/ABI/Events.json', 'utf8'));
+    var abiTickets=JSON.stringify(obj.abi);
+    obj = JSON.parse(fs.readFileSync('src/ABI/ValidatedAddresses.json', 'utf8'));
+    var abiUsers=JSON.stringify(obj.abi);
+    ContractTickets = new web3.eth.Contract(JSON.parse(abiTickets), ticketAddr);
+    ContractUsers = new web3.eth.Contract(JSON.parse(abiUsers), userAddr);
+    //console.log(ContractUsers);
   })
 });
 
@@ -673,6 +156,8 @@ app.post('/addEvents',(req, res) => {
   dbo.collection("events").insertOne(myobj, function(err, res2) {
     if (err) throw err;
     console.log(res2);
+    var lowsec=[];
+    var upsec=[];
     var ticktype=myobj.ticketstype.split(",");
     var tickprices=myobj.ticketsprice.split(",");
     var i;
@@ -682,13 +167,15 @@ app.post('/addEvents',(req, res) => {
     for(i=0;i<tickprices.length;i++){
       tickprices[i]=web3.utils.toWei(tickprices[i].replace(/\s/g, ''), 'ether');
       console.log("price: "+tickprices[i]);
+      lowsec[i]=web3.utils.toWei(tickprices[i].replace(/\s/g, ''), 'ether');
+      upsec[i]=web3.utils.toWei(tickprices[i].replace(/\s/g, ''), 'ether');
     }
     //hextoasciii sull'id?
     var id="0x"+res2.insertedId
     console.log("ID:"+id)
     console.log("add: "+ web3.eth.defaultAccount)
     console.log(id, web3.utils.asciiToHex(myobj.name), parseInt(myobj.date), parseInt(myobj.date)+10000, ticktype, myobj.maxticket, tickprices, [100,100])
-    ContractTickets.methods.addEvent( id, web3.utils.asciiToHex(myobj.name), ticktype, myobj.maxticket, tickprices, [100,100] ).send({from: web3.eth.defaultAccount , gas: 6000000 }).then(function(error, accounts) {console.log(error)});
+    ContractTickets.methods.addEvent( id, web3.utils.asciiToHex(myobj.name), ticktype, myobj.maxticket, tickprices, [100,100],1538660908,2538660908,lowsec,upsec ).send({from: web3.eth.defaultAccount , gas: 6000000 }).then(function(error, accounts) {console.log(error)});
     //ContractTickets.methods.addEvent( web3.utils.asciiToHex(myobj.name), web3.utils.asciiToHex(myobj.name),  myobj.maxticket).send({from: web3.eth.defaultAccount, gas: 6000000 }).then(function(error, accounts) {console.log(error)});
 
     res.render('addEvent',{saved:true})
@@ -751,8 +238,22 @@ app.post('/bought', (req, res) => {
       console.log(result);
    });
 });
+//test net
 app.post('/checkValidity', (req, res) => {
-  console.log(req.data);
+  var item=req.body;
+  ContractUsers.methods.getUserChallange(item.address).call({from: web3.eth.defaultAccount}).then(function(resWeb3) {
+    console.log(web3.utils.hexToUtf8(resWeb3)+""+item.challenge);
+    if(web3.utils.hexToUtf8(resWeb3)==item.challenge){
+      console.log("match");
+      ContractUsers.methods.setNewUser(item.address).send({from: web3.eth.defaultAccount , gas: 6000000 }).then(function(resWeb31) {
+        console.log(resWeb31);
+        res.send("valid");
+      });
+    }
+
+  });
+
+
 });
 function makeNounce() {
   var text = "";
