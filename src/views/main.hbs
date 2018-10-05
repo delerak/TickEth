@@ -1,14 +1,32 @@
 <script>
 console.log("start")
 let events;
-
+var ticketAddr='0x93110692f179060e3172763df1c68cc2c7151bfd';
+var userAddr='0xc851bf1b583801c3084ce796e9cceeaf2376318d';
+window.addEventListener('load', function () {
+  console.log("ok");
+if (typeof web3 !== 'undefined') {
+  console.log("siiii");
+  web3Provider = web3.currentProvider;
+} else {
+  console.log("ganache");
+  // If no injected web3 instance is detected, fall back to Ganache
+  web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
+}
+web3 = new Web3(web3Provider);
+web3.eth.getAccounts(function(error, accounts) {
+    web3.eth.defaultAccount = accounts[0];
+    console.log(web3.eth.defaultAccount);
+});
+});
+//fix for single ticketype
 function buy(item, fullItem){
-  var pwd = prompt("Enter the password for your ticket", "");
+  var pwd = prompt("Enter the hashes for your ticket", "");
 
   if (pwd == null || pwd == "") {
       return;
   }
-  console.log(JSON.parse(unescape(fullItem)));
+
   var id, type, quantity,price;
   tickets=$("#modal"+item+" input");
   console.log(tickets)
@@ -22,6 +40,7 @@ function buy(item, fullItem){
         type=tickets[i-1].value;
         quantity=tickets[i].value;
         price=tickets[++i].value;
+        break;
       }
     }
   }
@@ -29,20 +48,42 @@ function buy(item, fullItem){
   console.log(quantity);
   console.log("id "+"0x"+id);
   console.log(""+web3.toWei(quantity*price, 'ether'));
-
-  ContractTickets.buy("0x"+id, type, quantity, web3.eth.defaultAccount, web3.sha3(pwd+""+id, {encoding: 'hex'}),  {from:web3.eth.defaultAccount, to:'0xd72145b684a4add805885fb9a17814bff79787ff', gas: 6000000 ,value: web3.toWei(quantity*price, 'ether')},function(error, result){
+  var told=pwd.split(",");
+  var t=[];
+  for(i=0;i<quantity;i++){
+    if(told.length-1<i){
+      t[i]=told[told.length-1];
+    }else{
+      t[i]=told[i];
+    }
+  }
+  fullItem=JSON.parse(unescape(fullItem));
+  fullItem["bought"]=web3.eth.defaultAccount;//users address stored in session
+  fullItem["t"]=t;
+  console.log(JSON.stringify(fullItem));
+  //user chosoe who is attending
+  //t values should be stored in the user account
+  ContractTickets.buy("0x"+id, type, quantity, web3.eth.defaultAccount, t,  {from:web3.eth.defaultAccount, to:ticketAddr, gas: 6000000 ,value: web3.toWei(quantity*price, 'ether')},function(error, result){
      if(!error){
          console.log(result);
          $.ajax({
-  					type: 'POST',
-  					data: JSON.stringify(fullItem),
-  			        contentType: 'application/json',
-                        url: '/bought',
-                        success: function(data) {
-                            console.log('success');
-                            console.log(JSON.stringify(data));
-                        }
-          });
+           type: 'post',
+           url: '/bought',
+           data: fullItem,
+           xhrFields: {
+               withCredentials: false
+           },
+           headers: {
+
+           },
+           success: function (data) {
+               console.log('Success');
+               console.log(data);
+           },
+           error: function () {
+               console.log('We are sorry but our servers are having an issue right now');
+           }
+         })
     }else
          console.error(error);
  });
@@ -63,20 +104,18 @@ web3.eth.getAccounts(function(error, accounts) {
   web3.eth.defaultAccount = accounts[0];
   });
 
-var ContractAddr='0x31bdbe87c7d1098e86b69a89cc653e20dffa6b5b';
 $.getJSON("../ABI/ValidatedAddresses.json", function(json) {
     abiUsers=JSON.stringify(json.abi); // this will show the info it in firebug console
-    ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at(ContractAddr);
+    ContractUsers =  web3.eth.contract(JSON.parse(abiUsers)).at(userAddr);
     console.log(ContractUsers)
     });
-});
-var ContractTick='0x31bdbe87c7d1098e86b69a89cc653e20dffa6b5b';
+
 $.getJSON("../ABI/Events.json", function(json) {
     abiTickets=JSON.stringify(json.abi); // this will show the info it in firebug console
-    ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at(ContractTick);
+    ContractTickets =  web3.eth.contract(JSON.parse(abiTickets)).at(ticketAddr);
     console.log(ContractUsers)
     });
-});
+
 
 });
 function hideModal()
@@ -93,7 +132,7 @@ function doModal(placementId, heading, formContent, strSubmitFunc, btnText,idMod
     html += '<div class="modal-content">';
     html += '<div class="modal-header">';
     html += '<a class="close" data-dismiss="modal">×</a>';
-    html += '<h4>'+'</h4>'
+    html += '<h4>'+heading+'</h4>'
     html += '</div>';
     html += '<div class="modal-body">';
     html += formContent;

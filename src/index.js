@@ -1,6 +1,6 @@
 // index.js
-var ticketAddr='0xafd62a85038a89e3d8c0e4243fe42945f0d88011';
-var userAddr='0xada79a6a421750feaae356e6fadc35a217441124';
+var ticketAddr='0x93110692f179060e3172763df1c68cc2c7151bfd';
+var userAddr='0xc851bf1b583801c3084ce796e9cceeaf2376318d';
 const path = require('path')
 const express = require('express')
 const exphbs = require('express-handlebars')
@@ -68,7 +68,7 @@ app.set('view engine', '.hbs')
 app.set('views', path.join(__dirname, 'views'))
 app.post('/', (req, res) => {
   console.log("ok")
-  //console.log(req.body);
+  console.log(req.body);
   //ContractTickets.methods.buy(req.body.id[0], req.body.type[0], req.type.quantity[0]).send({from:web3.eth.defaultAccount, to:'0x2ffe4f0e841655d2711449dfc5a756faaaf84482', value:"100000"});
   //res.render('main');
 })
@@ -231,12 +231,14 @@ app.get('/validateUsers', (req, res) => {
         });
     });
 app.post('/bought', (req, res) => {
+  console.log("bought:");
   console.log(req.data);
-  dbo.collection("events").update({'_id':req.data._id}, {$push:{'bought':res.data}},
+
+  /*dbo.collection("events").update({'_id':req.data._id}, {$push:{'bought':res.data}},
   function (err, result) {
       if (err) throw err;
       console.log(result);
-   });
+   });*/
 });
 //test net
 app.post('/checkValidity', (req, res) => {

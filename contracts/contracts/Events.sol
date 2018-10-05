@@ -323,7 +323,7 @@ contract Events {
             }
             eventBuyer.ticketsID[_ticketsType][_t[i]]++;
         }
-
+        eventStore[_idEvent].sold[sender]=eventBuyer;
         fund+=money;
   }
 }
