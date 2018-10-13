@@ -123,7 +123,7 @@ app.get('/trading', (req, res) => {
   dbo.collection("events").find().toArray(function(err, data) {
     if (err) throw err;
   res.render('trade', {
-    events:data
+    events:data.reverse()
   })
 
 })
@@ -232,13 +232,14 @@ app.get('/validateUsers', (req, res) => {
     });
 app.post('/bought', (req, res) => {
   console.log("bought:");
-  console.log(req.data);
+  console.log(req.body);
 
-  /*dbo.collection("events").update({'_id':req.data._id}, {$push:{'bought':res.data}},
+
+  dbo.collection("users").update({'address':req.body.bought}, {$push:{'bought':req.body}},
   function (err, result) {
       if (err) throw err;
       console.log(result);
-   });*/
+   });
 });
 //test net
 app.post('/checkValidity', (req, res) => {

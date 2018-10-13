@@ -201,7 +201,9 @@ contract Events {
     function getResellerfirstAddr(bytes32 _idEvent, uint _resellerIndex) public returns (address){
       return eventStore[_idEvent].resellersAddr[_resellerIndex];
     }
-
+    /*function getTicketSecondM(uint index) public constant returns(uint, string, string, uint) {
+        return (users[index].salaryId, users[index].name, users[index].userAddress, users[index].salary);
+    }*/
     //add new object for every new sale
     //TODO: change old sale instead
     function sellTickets(bytes32 _idEvent, bytes32[] _t, uint[] _quantity, bytes32 _ticketsType, uint _ticketsPrice ) public{
